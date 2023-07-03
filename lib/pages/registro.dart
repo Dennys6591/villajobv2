@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:villajob/pages/empleador.dart';
 import 'package:villajob/pages/trabajadores.dart';
 import 'package:villajob/widgets_reutilizables/reutilizables.dart';
+
+import 'login.dart';
 class RegistroScreen extends StatefulWidget {
   const RegistroScreen({Key? key}) : super(key: key);
   @override
@@ -122,6 +124,8 @@ void _createUserAndSaveData() async {
       id = 'T${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
     } else if (_selectedOption == 'Empleador') {
       id = 'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+    } else if (_selectedOption == 'Ambos') {
+      id = 'A${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
     }
 
     await FirebaseFirestore.instance.collection('usuarios').doc(id).set({
@@ -144,17 +148,11 @@ void _createUserAndSaveData() async {
 
     print('Carpeta creada en Firebase Storage: $id');
 
-    if (_selectedOption == 'Trabajador') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => TrabajadoresScreen()),
+        MaterialPageRoute(builder: (context) => LoginScreem()),
       );
-    } else if (_selectedOption == 'Empleador') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
-      );
-    }
+
   } catch (error, stackTrace) {
     print("Error ${error.toString()}");
   }
@@ -249,7 +247,7 @@ void _createUserAndSaveData() async {
                       _selectedOption = newValue!;
                     });
                   },
-                  items: <String>['Trabajador', 'Empleador']
+                  items: <String>['Trabajador', 'Empleador', 'Ambos']
                       .map<DropdownMenuItem<String>>(
                     (String value) {
                       return DropdownMenuItem<String>(

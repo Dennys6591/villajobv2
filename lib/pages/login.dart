@@ -20,6 +20,53 @@ class _LoginScreemState extends State<LoginScreem> {
   TextEditingController _emailTextController = TextEditingController();
   bool _isLoading = true; // Variable para controlar el estado de carga
 
+  mostrarDialogo(){
+        showDialog(
+      context: context,
+      builder: (BuildContext context) {
+         return AlertDialog(
+          title: Text('Elija un rol'),
+          content: Container(
+            height: 250,
+            child: Column(
+              children: [
+                Container(
+                  height: 100,
+                  width: 200,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => TrabajadoresScreen()),
+                        ((route) => false),
+                      );
+                    },
+                    child: Text('Trabajador'),
+                  ),
+                ),
+                SizedBox(height: 10,),
+                Container(
+                  height: 100,
+                  width: 200,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
+                        ((route) => false),
+                      );
+                    },
+                    child: Text('Empleador'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,6 +166,7 @@ class _LoginScreemState extends State<LoginScreem> {
             context,
             MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
           );
+
         // ignore: unrelated_type_equality_checks
         } else if (userType == 'admin') {
            // ignore: use_build_context_synchronously
@@ -126,7 +174,8 @@ class _LoginScreemState extends State<LoginScreem> {
             context,
             MaterialPageRoute(builder: (context) => adminScreen()),
           );
-        }
+
+        } 
       } else {
         showErrorMessage('El usuario no existe o no tiene asignado un tipo de usuario');
       }
