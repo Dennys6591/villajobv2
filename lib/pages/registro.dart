@@ -25,6 +25,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
   TextEditingController _tipoTextController = TextEditingController();
   String _selectedOption = 'Trabajador';
   String id = '0';
+  String idE = '0';
   RegExp _nameRegExp = RegExp(r'^[a-zA-Z]+$');
   RegExp _cedulaRegExp = RegExp(r'^\d{10}$');
   RegExp _phoneRegExp = RegExp(r'^09\d{8}$');
@@ -125,8 +126,20 @@ void _createUserAndSaveData() async {
     } else if (_selectedOption == 'Empleador') {
       id = 'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
     } else if (_selectedOption == 'Ambos') {
-      id = 'A${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+      id = 'T${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+      idE = 'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+      
+      await FirebaseFirestore.instance.collection('usuarios').doc(idE).set({
+        'nombre': _nombreTextController.text,
+        'apellido': _apellidoTextController.text,
+        'email': _emailTextController.text,
+        'cedula': _cedulaTextController.text,
+        'telefono': _telefonoTextController.text,
+        'opcion': _selectedOption,
+        'id': idE,
+      });
     }
+
 
     await FirebaseFirestore.instance.collection('usuarios').doc(id).set({
       'nombre': _nombreTextController.text,

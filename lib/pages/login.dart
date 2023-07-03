@@ -166,8 +166,8 @@ class _LoginScreemState extends State<LoginScreem> {
             context,
             MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
           );
-
-        // ignore: unrelated_type_equality_checks
+        } else if (userType == 'Ambos') {
+          mostrarDialogo();
         } else if (userType == 'admin') {
            // ignore: use_build_context_synchronously
           Navigator.push(
