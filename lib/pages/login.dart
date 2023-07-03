@@ -6,6 +6,7 @@ import 'package:villajob/pages/registro.dart';
 import 'package:villajob/pages/trabajadores.dart';
 
 import '../widgets_reutilizables/reutilizables.dart';
+import 'administrado.dart';
 
 class LoginScreem extends StatefulWidget {
   const LoginScreem({Key? key}) : super(key: key);
@@ -107,14 +108,23 @@ class _LoginScreemState extends State<LoginScreem> {
         String? userType = userData['opcion'];
 
         if (userType == 'Trabajador') {
+          // ignore: use_build_context_synchronously
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => TrabajadoresScreen()),
           );
         } else if (userType == 'Empleador') {
+          // ignore: use_build_context_synchronously
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
+          );
+        // ignore: unrelated_type_equality_checks
+        } else if (userType == 'admin') {
+           // ignore: use_build_context_synchronously
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => adminScreen()),
           );
         }
       } else {
