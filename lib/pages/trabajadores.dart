@@ -197,6 +197,7 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('publicaciones')
+                          .where('bloqueada', isEqualTo: false)
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
