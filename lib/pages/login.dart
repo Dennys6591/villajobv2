@@ -169,14 +169,14 @@ class _LoginScreemState extends State<LoginScreem> {
             context,
             MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
           );
+        } else if (userType == 'Ambos') {
+          mostrarDialogo();
         } else if (userType == 'admin') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => adminScreen()),
           );
-        }else if (userType == 'Ambos') {
-          mostrarDialogo();
-        } 
+        }
       } else {
         showErrorMessage('El usuario no existe o no tiene asignado un tipo de usuario');
       }
