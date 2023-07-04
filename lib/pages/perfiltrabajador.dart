@@ -9,7 +9,7 @@ import 'editarPerfil.dart';
 //import 'package:editarPerfil.dart';
 
 class PerfilTrabajador extends StatefulWidget {
-  const PerfilTrabajador({Key? key}) : super(key: key);
+  const PerfilTrabajador({Key? key, required String trabajadorId}) : super(key: key);
 
   @override
   State<PerfilTrabajador> createState() => _PerfilTrabajadorState();

@@ -283,7 +283,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.person_outline),
+                    icon: Icon(Icons.folder),
                     onPressed: () {
                       // visualizar el contrato para darle la opcion de cerrarlo
                       //y calificar
