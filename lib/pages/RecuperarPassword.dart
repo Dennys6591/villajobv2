@@ -69,6 +69,18 @@ class _RecuperarPasswordScreenState extends State<RecuperarPasswordScreen> {
         title: Text('Recuperar contraseña'),
       ),
       body: Container(
+          width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 47, 152, 233),
+              Color.fromRGBO(236, 163, 249, 1)
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
