@@ -4,6 +4,7 @@ import 'package:villajob/pages/registro.dart';
 import 'package:villajob/pages/trabajadores.dart';
 
 import '../widgets_reutilizables/reutilizables.dart';
+import 'RecuperarPassword.dart';
 import 'administrado.dart';
 import 'package:villajob/logica_negocio/negocio.dart';
 
@@ -117,6 +118,10 @@ class _LoginScreemState extends State<LoginScreem> {
                   height: 30,
                 ),
                 loginButton(context, _isLoading, _signInWithEmailAndPassword),
+                Recuperar_contrasena(),
+                const SizedBox(
+                  height: 10,
+                ), 
                 Opcion_de_registro(),
               ],
             ),
@@ -222,4 +227,27 @@ class _LoginScreemState extends State<LoginScreem> {
       ],
     );
   }
+
+  Row Recuperar_contrasena() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("¿Olvidaste tu contraseña?",
+            style: TextStyle(color: Colors.white70)),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RecuperarPasswordScreen()),
+            );
+          },
+          child: const Text(
+            " RECUPERAR",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
 }
