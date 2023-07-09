@@ -6,10 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'editarPerfil.dart';
+import 'mostrarContrato.dart';
 //import 'package:editarPerfil.dart';
 
 class PerfilTrabajador extends StatefulWidget {
-  const PerfilTrabajador({Key? key, required String trabajadorId}) : super(key: key);
+  const PerfilTrabajador({Key? key, required String trabajadorId})
+      : super(key: key);
 
   @override
   State<PerfilTrabajador> createState() => _PerfilTrabajadorState();
@@ -204,6 +206,17 @@ class _PerfilTrabajadorState extends State<PerfilTrabajador> {
                     // home: EditarPerfilTrabajador();
                   },
                   child: const Text('Editar Perfil'),
+                ),
+                SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MostrarContrato())); //poner navigator
+                  },
+                  child: const Text('Contratos'),
                 ),
               ],
             ),
