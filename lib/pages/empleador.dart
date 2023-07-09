@@ -92,7 +92,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                   );
                 },
               ),
-        actions: [ 
+        actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'eliminarCuenta') {
@@ -101,7 +101,8 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: Text('Confirmar eliminación de cuenta'),
-                      content: Text('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
+                      content: Text(
+                          '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
                       actions: [
                         TextButton(
                           child: Text('Cancelar'),
@@ -112,62 +113,66 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                         TextButton(
                           child: Text('Eliminar cuenta'),
                           onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Confirmar eliminación de cuenta'),
-                                  content: Text('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
-                                  actions: [
-                                    TextButton(
-                                      child: Text('Cancelar'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: Text('Eliminar cuenta'),
-                                      onPressed: () {
-                                        // Obtener los datos del usuario actual
-                                        final userData = FirebaseAuth.instance.currentUser;
-                                        final solicitudRef = FirebaseFirestore.instance.collection('solicitud_eliminar_cuenta');
-                                        // Guardar los datos de la solicitud en Firestore
-                                        
-                                        solicitudRef.add({
-                                          'usuarioId': userData!.uid,
-                                          'email': userData.email,
-                                          'fecha': DateTime.now(),
-                                        }).then((_) {
-                                          // Cerrar todos los diálogos anteriores y mostrar el mensaje de confirmación
-                                          Navigator.of(context).popUntil((route) => route.isFirst);
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text('Solicitud enviada'),
-                                                content: Text('Tu solicitud para eliminar la cuenta ha sido enviada.'),
-                                                actions: [
-                                                  TextButton(
-                                                    child: Text('Cerrar'),
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
+                            // Obtener los datos del usuario actual
+                            final userData = FirebaseAuth.instance.currentUser;
+                            final solicitudRef = FirebaseFirestore.instance
+                                .collection('solicitud_eliminar_cuenta');
+                            final usuariosRef = FirebaseFirestore.instance
+                                .collection('usuarios');
+
+                            // Obtener el nombre y el ID del usuario de la colección "usuarios"
+                            usuariosRef.doc(empleadorId).get().then((snapshot) {
+                              if (snapshot.exists) {
+                                final nombre = snapshot.data()?['nombre'];
+                                final id = snapshot.data()?['id'];
+
+                                // Guardar los datos de la solicitud en Firestore
+                                solicitudRef.add({
+                                  'usuarioId': userData?.uid,
+                                  'email': userData?.email,
+                                  'nombre': nombre,
+                                  'id': id,
+                                  'fecha': DateTime.now(),
+                                }).then((_) {
+                                  // Cerrar todos los diálogos anteriores y mostrar el mensaje de confirmación
+                                  Navigator.of(context)
+                                      .popUntil((route) => route.isFirst);
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Solicitud enviada'),
+                                        content: Text(
+                                            'Tu solicitud para eliminar la cuenta ha sido enviada.'),
+                                        actions: [
+                                          TextButton(
+                                            child: Text('Cerrar'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
                                             },
-                                          );
-                                        }).catchError((error) {
-                                          // Manejar el error si no se puede guardar la solicitud
-                                          print('Error al guardar la solicitud: $error');
-                                          // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }).catchError((error) {
+                                  // Manejar el error si no se puede guardar la solicitud
+                                  print(
+                                      'Error al guardar la solicitud: $error');
+                                  // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                                });
+                              } else {
+                                // El documento del usuario no existe en la colección "usuarios"
+                                print(
+                                    'Error: No se encontró el usuario en la colección "usuarios".');
+                                // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                              }
+                            }).catchError((error) {
+                              // Manejar el error si no se puede obtener los datos del usuario
+                              print(
+                                  'Error al obtener los datos del usuario: $error');
+                              // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                            });
                           },
                         ),
                       ],
@@ -210,8 +215,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                       .get(),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator();
                     }
 
@@ -219,27 +223,32 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                       return Text('Error: ${snapshot.error}');
                     }
 
-                    if (snapshot.hasData &&
-                        snapshot.data!.docs.isNotEmpty) {
+                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
                       return SingleChildScrollView(
                         child: Column(
-                          children: List.generate(
-                              snapshot.data!.docs.length, (index) {
+                          children: List.generate(snapshot.data!.docs.length,
+                              (index) {
                             var trabajador = snapshot.data!.docs[index];
 
                             return Container(
                               width: MediaQuery.of(context).size.width * 0.9,
-                              height: MediaQuery.of(context).size.height * 0.125,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.125,
                               margin: EdgeInsets.all(20),
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
-                                  Icon(Icons.person, size: 50,),
+                                  Icon(
+                                    Icons.person,
+                                    size: 50,
+                                  ),
                                   Column(
                                     children: [
                                       Text(
@@ -254,13 +263,27 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                                             trabajador['cedula'],
                                         style: TextStyle(fontSize: 12),
                                       ),
-                                      SizedBox(height: 5,),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
                                       Row(
                                         children: [
-                                          Text('Calificación:', style: TextStyle(fontSize: 12),),
-                                          Icon(Icons.star, color: Colors.yellow,),
-                                          Icon(Icons.star, color: Colors.yellow,),
-                                          Icon(Icons.star, color: Colors.yellow,),
+                                          Text(
+                                            'Calificación:',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                          ),
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                          ),
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                          ),
                                         ],
                                       )
                                     ],
@@ -278,48 +301,45 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                 ),
         ),
       ),
-      bottomNavigationBar:  BottomAppBar(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.folder),
-                    onPressed: () {
-                      // visualizar el contrato para darle la opcion de cerrarlo
-                      //y calificar
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ContratosScreen()));
-                    },
-                  ),
-                  ElevatedButton(
-                    child: Text("Crear Publicación"),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RegistroPublicacionScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.exit_to_app),
-                    onPressed: () {
-                      print("Saliendo");
-                      FirebaseAuth.instance.signOut().then((value) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => LoginScreem()),
-                        );
-                      });
-                    },
-                  ),
-                ],
-              ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: Icon(Icons.folder),
+              onPressed: () {
+                // visualizar el contrato para darle la opcion de cerrarlo
+                //y calificar
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ContratosScreen()));
+              },
             ),
+            ElevatedButton(
+              child: Text("Crear Publicación"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegistroPublicacionScreen(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.exit_to_app),
+              onPressed: () {
+                print("Saliendo");
+                FirebaseAuth.instance.signOut().then((value) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreem()),
+                  );
+                });
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
