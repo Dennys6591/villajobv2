@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:villajob/pages/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:villajob/pages/registroPubli.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'contratos.dart';
 
@@ -17,7 +16,9 @@ class EmpleadoresScreen extends StatefulWidget {
 class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
   late String empleadorId;
   late bool isLoading = true;
-
+  late Stream<QuerySnapshot<Map<String, dynamic>>> trabajadoresStream;
+  String searchQuery = '';
+  
   @override
   void initState() {
     super.initState();
@@ -39,6 +40,11 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
       }
       setState(() {
         isLoading = false;
+        trabajadoresStream = FirebaseFirestore.instance
+            .collection('usuarios')
+            .where('id', isGreaterThanOrEqualTo: 'T')
+            .where('id', isLessThan: 'U')
+            .snapshots();
       });
     }).catchError((error) {
       print('Error al obtener el trabajador: $error');
@@ -192,117 +198,159 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
           ),
         ],
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 47, 152, 233),
-              Color.fromRGBO(236, 163, 249, 1)
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      ////////////////////////////////////////////body
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context)
+              .unfocus(); // Cierra el teclado virtual al tocar en cualquier lugar de la pantalla
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 47, 152, 233),
+                Color.fromRGBO(236, 163, 249, 1)
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 60),
-          child: isLoading
-              ? CircularProgressIndicator()
-              : FutureBuilder<QuerySnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('usuarios')
-                      .where('id', isGreaterThanOrEqualTo: 'T')
-                      .where('id', isLessThan: 'U')
-                      .get(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    }
+          child: Padding(
+            padding: const EdgeInsets.only(top: 60),
+            child: ListView(
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nombre',
 
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
+                    prefixIcon: Icon(Icons.search),
 
-                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: List.generate(snapshot.data!.docs.length,
-                              (index) {
-                            var trabajador = snapshot.data!.docs[index];
+                    filled: true, // Agrega el fondo blanco
 
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              height:
-                                  MediaQuery.of(context).size.height * 0.125,
-                              margin: EdgeInsets.all(20),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Icon(
-                                    Icons.person,
-                                    size: 50,
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        trabajador['nombre'] +
-                                            ' ' +
-                                            trabajador['apellido'] +
-                                            ' \n' +
-                                            'Teléfono: ' +
-                                            trabajador['telefono'] +
-                                            ' \n' +
-                                            'Cédula: ' +
-                                            trabajador['cedula'],
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'Calificación:',
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ),
-                      );
-                    }
+                    fillColor:
+                        Colors.white, // Establece el color de fondo blanco
 
-                    return Text('No se encontraron trabajadores.');
+                    hintStyle: TextStyle(
+                        color: Colors
+                            .black), // Establece el color del texto de sugerencia
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none, // Elimina el borde
+
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value;
+                    });
                   },
                 ),
+                SizedBox(height: 20),
+                isLoading
+                    ? CircularProgressIndicator()
+                    : StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('usuarios')
+                            .where('id', isGreaterThanOrEqualTo: 'T')
+                            .where('id', isLessThan: 'U')
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          }
+
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+
+                          if (snapshot.hasData &&
+                              snapshot.data!.docs.isNotEmpty) {
+                            final trabajadores = snapshot.data!.docs;
+
+                            // Filtrar trabajadores por nombre
+
+                            final filteredTrabajadores =
+                                trabajadores.where((trabajador) {
+                              final nombreCompleto =
+                                  '${trabajador['nombre']} ${trabajador['apellido']}';
+
+                              return nombreCompleto
+                                  .toLowerCase()
+                                  .contains(searchQuery.toLowerCase());
+                            }).toList();
+
+                            if (filteredTrabajadores.isNotEmpty) {
+                              return ListView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: filteredTrabajadores.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  var trabajador = filteredTrabajadores[index];
+
+                                  return Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.9,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.125,
+                                    margin: EdgeInsets.all(20),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Icon(Icons.person, size: 50),
+                                        Column(
+                                          children: [
+                                            Text(
+                                              '${trabajador['nombre']} ${trabajador['apellido']} \nTeléfono: ${trabajador['telefono']} \nCédula: ${trabajador['cedula']}',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Row(
+                                              children: [
+                                                Text('Calificación:',
+                                                    style: TextStyle(
+                                                        fontSize: 12)),
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            } else {
+                              return Text('No se encontraron trabajadores.');
+                            }
+                          }
+
+                          return Text('No se encontraron trabajadores.');
+                        },
+                      ),
+              ],
+            ),
+          ),
         ),
       ),
+
+      //////////////////////////////////fin body
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
