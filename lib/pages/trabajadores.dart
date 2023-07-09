@@ -89,108 +89,104 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                   },
                 ),
           actions: [
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'eliminarCuenta') {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Confirmar eliminación de cuenta'),
-                        content: Text(
-                            '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
-                        actions: [
-                          TextButton(
-                            child: Text('Cancelar'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          TextButton(
-                            child: Text('Eliminar cuenta'),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title:
-                                        Text('Confirmar eliminación de cuenta'),
-                                    content: Text(
-                                        '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
-                                    actions: [
-                                      TextButton(
-                                        child: Text('Cancelar'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                      TextButton(
-                                        child: Text('Eliminar cuenta'),
-                                        onPressed: () {
-                                          // Obtener los datos del usuario actual
-                                          final userData =
-                                              FirebaseAuth.instance.currentUser;
-                                          final solicitudRef = FirebaseFirestore
-                                              .instance
-                                              .collection(
-                                                  'solicitud_eliminar_cuenta');
-                                          // Guardar los datos de la solicitud en Firestore
-                                          solicitudRef.add({
-                                            'usuarioId': userData!.uid,
-                                            'email': userData.email,
-                                            'fecha': DateTime.now(),
-                                          }).then((_) {
-                                            // Cerrar todos los diálogos anteriores y mostrar el mensaje de confirmación
-                                            Navigator.of(context).popUntil(
-                                                (route) => route.isFirst);
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title:
-                                                      Text('Solicitud enviada'),
-                                                  content: Text(
-                                                      'Tu solicitud para eliminar la cuenta ha sido enviada.'),
-                                                  actions: [
-                                                    TextButton(
-                                                      child: Text('Cerrar'),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          }).catchError((error) {
-                                            // Manejar el error si no se puede guardar la solicitud
-                                            print(
-                                                'Error al guardar la solicitud: $error');
-                                            // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
-                                          });
-                                        },
-                                      ),
-                                    ],
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'eliminarCuenta') {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Confirmar eliminación de cuenta'),
+                      content: Text(
+                          '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
+                      actions: [
+                        TextButton(
+                          child: Text('Cancelar'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text('Eliminar cuenta'),
+                          onPressed: () {
+                            // Obtener los datos del usuario actual
+                            final userData = FirebaseAuth.instance.currentUser;
+                            final solicitudRef = FirebaseFirestore.instance
+                                .collection('solicitud_eliminar_cuenta');
+                            final usuariosRef = FirebaseFirestore.instance
+                                .collection('usuarios');
+
+                            // Obtener el nombre y el ID del usuario de la colección "usuarios"
+                            usuariosRef.doc(trabajadorId).get().then((snapshot) {
+                              if (snapshot.exists) {
+                                final nombre = snapshot.data()?['nombre'];
+                                final id = snapshot.data()?['id'];
+                                final apellido = snapshot.data()?['apellido'];
+
+                                // Guardar los datos de la solicitud en Firestore
+                                solicitudRef.add({
+                                  'usuarioId': userData?.uid,
+                                  'email': userData?.email,
+                                  'nombre': nombre,
+                                  'apellido': apellido,
+                                  'id': id,
+                                  'fecha': DateTime.now(),
+                                }).then((_) {
+                                  // Cerrar todos los diálogos anteriores y mostrar el mensaje de confirmación
+                                  Navigator.of(context)
+                                      .popUntil((route) => route.isFirst);
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Solicitud enviada'),
+                                        content: Text(
+                                            'Tu solicitud para eliminar la cuenta ha sido enviada.'),
+                                        actions: [
+                                          TextButton(
+                                            child: Text('Cerrar'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              itemBuilder: (BuildContext context) => [
-                PopupMenuItem<String>(
-                  value: 'eliminarCuenta',
-                  child: Text('Solicitar eliminación de cuenta'),
-                ),
-              ],
-            ),
-          ],
+                                }).catchError((error) {
+                                  // Manejar el error si no se puede guardar la solicitud
+                                  print(
+                                      'Error al guardar la solicitud: $error');
+                                  // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                                });
+                              } else {
+                                // El documento del usuario no existe en la colección "usuarios"
+                                print(
+                                    'Error: No se encontró el usuario en la colección "usuarios".');
+                                // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                              }
+                            }).catchError((error) {
+                              // Manejar el error si no se puede obtener los datos del usuario
+                              print(
+                                  'Error al obtener los datos del usuario: $error');
+                              // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'eliminarCuenta',
+                child: Text('Solicitar eliminación de cuenta'),
+              ),
+            ],
+          ),
+        ],
         ),
         body: Stack(
           children: [
@@ -332,7 +328,8 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => PerfilTrabajador(trabajadorId: trabajadorId) ),
+                                  builder: (context) => PerfilTrabajador(
+                                      trabajadorId: trabajadorId)),
                             );
                           },
                         ),

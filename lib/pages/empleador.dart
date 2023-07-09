@@ -125,12 +125,14 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                               if (snapshot.exists) {
                                 final nombre = snapshot.data()?['nombre'];
                                 final id = snapshot.data()?['id'];
+                                final apellido = snapshot.data()?['apellido'];
 
                                 // Guardar los datos de la solicitud en Firestore
                                 solicitudRef.add({
                                   'usuarioId': userData?.uid,
                                   'email': userData?.email,
                                   'nombre': nombre,
+                                  'apellido': apellido,
                                   'id': id,
                                   'fecha': DateTime.now(),
                                 }).then((_) {
