@@ -33,15 +33,21 @@ Future passwordReset() async {
             content: Text('No se encontró una cuenta para ese correo electrónico.'),
           ),
         );
-      }
+      } else if (e.code == 'invalid-email') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('El correo electrónico no es válido.'),
+          ),
+        );
     }
+  }  
 }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recuperar contraseña'),
+        title: const Text('Restablecer contraseña'),
         backgroundColor: Colors.deepPurple[200],
         elevation: 0,
       ),
@@ -85,7 +91,7 @@ Future passwordReset() async {
         SizedBox(height: 10),
 
         MaterialButton(onPressed: passwordReset,
-        child: Text('Reiniciar Contraseña.'),
+        child: Text('Reiniciar Contraseña'),
         color: Colors.deepPurple[200],
         textColor: Colors.white,
         ),
