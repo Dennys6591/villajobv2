@@ -13,6 +13,7 @@ class MostrarContrato extends StatefulWidget {
 
 class _MostrarContratoState extends State<MostrarContrato> {
   late String trabajadorId;
+  double promedioCalificaciones = 0.0;
   bool isLoading = true;
 
   @override
@@ -54,6 +55,36 @@ class _MostrarContratoState extends State<MostrarContrato> {
     String nombreTrabajador = trabajadorData['nombre'] ?? 'Nombre desconocido';
     return nombreTrabajador;
   }
+  void calcularPromedioCalificaciones(String trabajadorId) {
+    double promedio = 0.0;
+    int cantidadCalificaciones = 0;
+
+    FirebaseFirestore.instance
+        .collection('contratos')
+        .where('trabajadorId', isEqualTo: trabajadorId)
+        .where('estado', isEqualTo: 'cerrado')
+        .get()
+        .then((QuerySnapshot snapshot) {
+      for (var doc in snapshot.docs) {
+        if (doc['calificacion'] != null) {
+          promedio += doc['calificacion'];
+          cantidadCalificaciones++;
+        }
+      }
+
+      if (cantidadCalificaciones > 0) {
+        promedio = promedio / cantidadCalificaciones;
+      }
+
+      setState(() {
+        promedioCalificaciones = promedio;
+      });
+    }).catchError((error) {
+      print('Error al obtener los contratos: $error');
+    });
+  }
+
+  double get obtenerPromedioCalificaciones => promedioCalificaciones;
 
   @override
   Widget build(BuildContext context) {

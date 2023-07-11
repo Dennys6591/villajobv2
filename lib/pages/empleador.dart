@@ -18,11 +18,14 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
   late bool isLoading = true;
   late Stream<QuerySnapshot<Map<String, dynamic>>> trabajadoresStream;
   String searchQuery = '';
-  
+  late String trabajadorId;
+  double promedioCalificaciones = 0.0;
+
   @override
   void initState() {
     super.initState();
     obtenerEmpleadorId();
+    obtenerTrabajadorId();
   }
 
   void obtenerEmpleadorId() async {
@@ -51,6 +54,60 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
       setState(() {
         isLoading = false;
       });
+    });
+  }
+
+  void obtenerTrabajadorId() {
+    String? trabajadorEmail = FirebaseAuth.instance.currentUser!.email;
+
+    FirebaseFirestore.instance
+        .collection('usuarios')
+        .where('email', isEqualTo: trabajadorEmail)
+        .get()
+        .then((QuerySnapshot snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          trabajadorId = snapshot.docs[0].id;
+          isLoading = false;
+        });
+
+        // Obtener el promedio una vez que se tenga el trabajadorId
+        calcularPromedioCalificaciones(trabajadorId);
+      }
+    }).catchError((error) {
+      print('Error al obtener el trabajador: $error');
+      setState(() {
+        isLoading = false;
+      });
+    });
+  }
+
+  void calcularPromedioCalificaciones(String trabajadorId) {
+    double promedio = 0.0;
+    int cantidadCalificaciones = 0;
+
+    FirebaseFirestore.instance
+        .collection('contratos')
+        .where('trabajadorId', isEqualTo: trabajadorId)
+        .where('estado', isEqualTo: 'cerrado')
+        .get()
+        .then((QuerySnapshot snapshot) {
+      for (var doc in snapshot.docs) {
+        if (doc['calificacion'] != null) {
+          promedio += doc['calificacion'];
+          cantidadCalificaciones++;
+        }
+      }
+
+      if (cantidadCalificaciones > 0) {
+        promedio = promedio / cantidadCalificaciones;
+      }
+
+      setState(() {
+        promedioCalificaciones = promedio;
+      });
+    }).catchError((error) {
+      print('Error al obtener los contratos: $error');
     });
   }
 
