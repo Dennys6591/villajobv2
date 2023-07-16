@@ -101,46 +101,64 @@ class _adminScreenState extends State<adminScreen> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // Contenido de la página
-          Column(
-            children: [
-              // Otros widgets que desees mostrar antes del listado
-              Text(
+      body: Container(
+        padding: EdgeInsets
+            .zero, // Ajusta el padding a cero para eliminar el espacio adicional
+        alignment: Alignment.centerLeft, // Alinea el contenido a la izquierda
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 47, 152, 233),
+              Color.fromRGBO(236, 163, 249, 1),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment
+              .start, // Alinea los elementos del Column a la izquierda
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 60),
+              child: Text(
                 'Listado de solicitudes de eliminación de cuenta',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('solicitud_eliminar_cuenta')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('solicitud_eliminar_cuenta')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
 
-                    if (snapshot.hasError) {
-                      return Text('Error al cargar las solicitudes');
-                    }
+                  if (snapshot.hasError) {
+                    return Text('Error al cargar las solicitudes');
+                  }
 
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Text('No hay solicitudes');
-                    }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Text('No hay solicitudes');
+                  }
 
-                    return ListView.builder(
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        final solicitud = snapshot.data!.docs[index];
-                        final email = solicitud['email'];
-                        final fecha = solicitud['fecha'].toDate();
-                        final usuarioId = solicitud['usuarioId'];
-                        final nombre = solicitud['nombre'];
-                        final apellido = solicitud['apellido'];
-                        final id = solicitud['id'];
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      final solicitud = snapshot.data!.docs[index];
+                      final email = solicitud['email'];
+                      final fecha = solicitud['fecha'].toDate();
+                      final usuarioId = solicitud['usuarioId'];
+                      final nombre = solicitud['nombre'];
+                      final apellido = solicitud['apellido'];
+                      final id = solicitud['id'];
 
-                        return ListTile(
+                      return Container(
+                        child: ListTile(
                           title: Text('Nombre: $nombre - Apellido: $apellido'),
                           subtitle: Text(
                               'Fecha: $fecha - ID authentication: $usuarioId - ID usuario: $id - email: $email '),
@@ -158,15 +176,15 @@ class _adminScreenState extends State<adminScreen> {
                               ),
                             ],
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
