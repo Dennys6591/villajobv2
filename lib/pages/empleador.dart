@@ -176,15 +176,16 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                         TextButton(
                           child: Text('Eliminar cuenta'),
                           onPressed: () {
-                            // Obtener los datos del usuario actual
                             final userData = FirebaseAuth.instance.currentUser;
                             final solicitudRef = FirebaseFirestore.instance
                                 .collection('solicitud_eliminar_cuenta');
                             final usuariosRef = FirebaseFirestore.instance
                                 .collection('usuarios');
 
-                            // Obtener el nombre y el ID del usuario de la colección "usuarios"
-                            usuariosRef.doc(empleadorId).get().then((snapshot) {
+                            usuariosRef
+                                .doc(userData?.uid)
+                                .get()
+                                .then((snapshot) {
                               if (snapshot.exists) {
                                 final nombre = snapshot.data()?['nombre'];
                                 final id = snapshot.data()?['id'];
@@ -233,7 +234,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                                 // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
                               }
                             }).catchError((error) {
-                              // Manejar el error si no se puede obtener los datos del usuario
+                              // Manejar el error si no se pueden obtener los datos del usuario
                               print(
                                   'Error al obtener los datos del usuario: $error');
                               // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
@@ -244,6 +245,8 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                     );
                   },
                 );
+              } else if (value == 'verPublicacionesEliminadas') {
+                mostrarPublicacionesEliminadas(context);
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -251,9 +254,14 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                 value: 'eliminarCuenta',
                 child: Text('Solicitar eliminación de cuenta'),
               ),
+              PopupMenuItem<String>(
+                value: 'verPublicacionesEliminadas',
+                child: Text('Ver publicaciones eliminadas'),
+              ),
             ],
           ),
         ],
+        ///////////////////////////////////////////////
       ),
       ////////////////////////////////////////////body
       body: GestureDetector(
@@ -447,6 +455,58 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void mostrarPublicacionesEliminadas(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('public_eliminada')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Text('Error al cargar las publicaciones eliminadas');
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Text('No hay publicaciones eliminadas');
+            }
+
+            return AlertDialog(
+              content: ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final publicacion = snapshot.data!.docs[index];
+                  final descripcion = publicacion['descripcion'];
+                  final motivo = publicacion['motivo'];
+
+                  return Container(
+                    child: ListTile(
+                      title: Text('Descripción: $descripcion'),
+                      subtitle: Text('Motivo: $motivo'),
+                    ),
+                  );
+                },
+              ),
+              actions: [
+                TextButton(
+                  child: Text('Cerrar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

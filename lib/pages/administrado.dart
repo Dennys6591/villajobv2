@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:villajob/pages/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:villajob/pages/perfiltrabajador.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'buscadorUsuario.dart';
 
 class adminScreen extends StatefulWidget {
   const adminScreen({super.key});
@@ -101,46 +101,62 @@ class _adminScreenState extends State<adminScreen> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // Contenido de la página
-          Column(
-            children: [
-              // Otros widgets que desees mostrar antes del listado
-              Text(
+      body: Container(
+        padding: EdgeInsets.zero,
+        alignment: Alignment.centerLeft,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 47, 152, 233),
+              Color.fromRGBO(236, 163, 249, 1),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 0, top: 60),
+              child: Text(
                 'Listado de solicitudes de eliminación de cuenta',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('solicitud_eliminar_cuenta')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('solicitud_eliminar_cuenta')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
 
-                    if (snapshot.hasError) {
-                      return Text('Error al cargar las solicitudes');
-                    }
+                  if (snapshot.hasError) {
+                    return Text('Error al cargar las solicitudes');
+                  }
 
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Text('No hay solicitudes');
-                    }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Text('No hay solicitudes');
+                  }
 
-                    return ListView.builder(
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        final solicitud = snapshot.data!.docs[index];
-                        final email = solicitud['email'];
-                        final fecha = solicitud['fecha'].toDate();
-                        final usuarioId = solicitud['usuarioId'];
-                        final nombre = solicitud['nombre'];
-                        final apellido = solicitud['apellido'];
-                        final id = solicitud['id'];
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      final solicitud = snapshot.data!.docs[index];
+                      final email = solicitud['email'];
+                      final fecha = solicitud['fecha'].toDate();
+                      final usuarioId = solicitud['usuarioId'];
+                      final nombre = solicitud['nombre'];
+                      final apellido = solicitud['apellido'];
+                      final id = solicitud['id'];
 
-                        return ListTile(
+                      return Container(
+                        child: ListTile(
                           title: Text('Nombre: $nombre - Apellido: $apellido'),
                           subtitle: Text(
                               'Fecha: $fecha - ID authentication: $usuarioId - ID usuario: $id - email: $email '),
@@ -151,22 +167,81 @@ class _adminScreenState extends State<adminScreen> {
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
                                   // Acción para eliminar la solicitud
-                                  eliminarUsuarioCompleto(solicitud['email'],
-                                      usuarioId, solicitud.id, solicitud['id']);
-                                  //eliminarUsuarioPorCorreo(solicitud['email']);
+                                  eliminarUsuarioCompleto(
+                                      email, usuarioId, solicitud.id, id);
                                 },
                               ),
                             ],
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
-            ],
-          ),
-        ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 0, top: 100),
+              child: Text(
+                'Listado de publicaciones',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('publicaciones')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Text('Error al cargar las publicaciones');
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Text('No hay publicaciones');
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      final publicacion = snapshot.data!.docs[index];
+                      final bloqueada = publicacion['bloqueada'];
+                      final descripcion = publicacion['descripcion'];
+                      final empleadorId = publicacion['empleadorId'];
+                      final precio = publicacion['precio'];
+                      final id = publicacion.id;
+
+                      return Container(
+                        child: ListTile(
+                          title: Text(
+                              'Descripción: $descripcion - Precio: $precio'),
+                          subtitle: Text(
+                              'Empleador ID: $empleadorId - Bloqueada: $bloqueada'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  // Acción para eliminar la publicación
+                                  eliminarPublicacion(id, empleadorId);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -240,190 +315,48 @@ class _adminScreenState extends State<adminScreen> {
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class UserSearchDelegate extends SearchDelegate<String> {
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
+void eliminarPublicacion(String id, String empleadorId) async {
+  try {
+    // Obtener la referencia de la publicación específica
+    DocumentSnapshot publicacionSnapshot = await FirebaseFirestore.instance
+        .collection('publicaciones')
+        .doc(id)
+        .get();
 
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, '');
-      },
-    );
-  }
+    if (publicacionSnapshot.exists) {
+      // Guardar empleadorId y motivo en la colección "public_eliminadas"
+      String empleadorId = publicacionSnapshot['empleadorId'];
+      String descripcion = publicacionSnapshot['descripcion'];
+      String motivo =
+          'Se eliminó porque incumple con nuestras normas. Vuelva a publicar.';
 
-  @override
-  Widget buildResults(BuildContext context) {
-    return Container(
-      child: Text('Resultados de búsqueda para: $query'),
-    );
-  }
+      await FirebaseFirestore.instance.collection('public_eliminadas').add({
+        'empleadorId': empleadorId,
+        'motivo': motivo,
+        'descripcion': descripcion,
+      });
 
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: query.isEmpty
-          ? FirebaseFirestore.instance.collection('usuarios').snapshots()
-          : FirebaseFirestore.instance
-              .collection('usuarios')
-              .where('nombre', isEqualTo: query)
-              .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Text('Error al cargar los usuarios');
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Text('No se encontraron usuarios');
-        }
+      // Eliminar la publicación de la colección "publicaciones"
+      await publicacionSnapshot.reference.delete();
 
-        final users = snapshot.data!.docs;
-
-        return ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final userData = users[index].data() as Map<String, dynamic>;
-            final apellido = userData['apellido'];
-            final cedula = userData['cedula'];
-            final email = userData['email'];
-            final id = userData['id'];
-            final nombre = userData['nombre'];
-            final opcion = userData['opcion'];
-            final telefono = userData['telefono'];
-
-            return ListTile(
-              title: Text('$nombre $apellido'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Cédula: $cedula'),
-                  Text('Email: $email'),
-                  Text('ID: $id'),
-                  Text('Opción: $opcion'),
-                  Text('Teléfono: $telefono'),
-                ],
-              ),
-              trailing: IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Eliminar usuario'),
-                        content: Text(
-                            '¿Estás seguro de que deseas eliminar este usuario?'),
-                        actions: [
-                          TextButton(
-                            child: Text('Cancelar'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          TextButton(
-                            child: Text('Eliminar'),
-                            onPressed: () {
-                              eliminarUsuarioCompleto(email, id, id);
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void eliminarUsuarioCompleto(String correo, String userId, String id) async {
-    try {
-      // Eliminar el usuario de Firebase Authentication
-      User? user = await FirebaseAuth.instance.currentUser;
-      if (user != null && user.uid == userId) {
-        await user.delete();
-        print('Usuario eliminado de Firebase Authentication exitosamente.');
-      } else {
-        print(
-            'No se encontró un usuario con el ID especificado en Firebase Authentication.');
-      }
-
-      // Consultar el usuario por correo electrónico
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .where('email', isEqualTo: correo)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        final usuarioId = querySnapshot.docs[0].id;
-
-        // Eliminar las publicaciones del empleador
-        QuerySnapshot publicacionesEmpleadorSnapshot = await FirebaseFirestore
-            .instance
-            .collection('publicaciones')
-            .where('empleadorId', isEqualTo: id)
-            .get();
-
-        for (QueryDocumentSnapshot doc in publicacionesEmpleadorSnapshot.docs) {
-          await doc.reference.delete();
-        }
-
-        // Eliminar los contratos del trabajador
-        QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore
-            .instance
-            .collection('contratos')
-            .where('trabajadorId', isEqualTo: id)
-            .get();
-
-        for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
-          await doc.reference.delete();
-        }
-
-        // Eliminar el usuario de Firestore
-        await FirebaseFirestore.instance
-            .collection('usuarios')
-            .doc(usuarioId)
-            .delete();
-
-        // Eliminar la solicitud de Firestore
-        await FirebaseFirestore.instance
-            .collection('solicitud_eliminar_cuenta')
-            .doc(id)
-            .delete();
-
-        print('Usuario eliminado exitosamente.');
-      } else {
-        print(
-            'No se encontró ningún usuario con el correo electrónico especificado.');
-      }
-
-      await FirebaseAuth.instance.signOut();
-    } catch (e) {
-      print('Error al eliminar el usuario: $e');
+      print('Publicación eliminada exitosamente.');
+    } else {
+      print('No se encontró ninguna publicación con el ID especificado.');
     }
+
+    // Eliminar los contratos del trabajador
+    QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore.instance
+        .collection('contratos')
+        .where('empleadorId', isEqualTo: empleadorId)
+        .get();
+
+    for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
+      await doc.reference.delete();
+    }
+  } catch (e) {
+    print('Error al eliminar la publicación: $e');
   }
 }
-
-
-
 
 /*
  void eliminarUsuarioPorId(String userId) {
