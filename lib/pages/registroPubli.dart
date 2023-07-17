@@ -10,8 +10,7 @@ class RegistroPublicacionScreen extends StatefulWidget {
       _RegistroPublicacionScreenState();
 }
 
-class _RegistroPublicacionScreenState
-    extends State<RegistroPublicacionScreen> {
+class _RegistroPublicacionScreenState extends State<RegistroPublicacionScreen> {
   TextEditingController _descripcionController = TextEditingController();
   TextEditingController _precioController = TextEditingController();
 
@@ -55,7 +54,7 @@ class _RegistroPublicacionScreenState
     String descripcion = _descripcionController.text;
     String precio = _precioController.text;
 
-    // Obtener el ID del empleador actualmente autenticado
+    // Obtener el ID y correo del empleador actualmente autenticado
     String? empleadoEmail = FirebaseAuth.instance.currentUser!.email;
 
     FirebaseFirestore.instance
@@ -65,13 +64,16 @@ class _RegistroPublicacionScreenState
         .then((QuerySnapshot snapshot) {
       if (snapshot.docs.isNotEmpty) {
         String empleadorId = snapshot.docs[0].id;
+        String empleadorEmail = snapshot.docs[0].get('email');
 
         // Crear un nuevo documento de publicación en Firestore
         FirebaseFirestore.instance.collection('publicaciones').add({
           'descripcion': descripcion,
           'precio': precio,
           'empleadorId': empleadorId,
-          'bloqueada': false, // Agregar la variable 'bloqueada' con valor predeterminado false
+          'empleadorEmail': empleadorEmail,
+          'bloqueada':
+              false, // Agregar la variable 'bloqueada' con valor predeterminado false
         }).then((value) {
           // Registro exitoso
           print('Publicación registrada con éxito');
