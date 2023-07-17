@@ -203,7 +203,8 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
-                          .collection('publicaciones')
+                          .collectionGroup('publicaciones')
+                          .where('empleadorEmail', isNotEqualTo: FirebaseAuth.instance.currentUser!.email)
                           .where('bloqueada', isEqualTo: false)
                           .snapshots(),
                       builder: (context, snapshot) {
