@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import '../firebase_options.dart';
+import 'changePass.dart';
 
 class EditarPerfilTrabajador extends StatefulWidget {
   const EditarPerfilTrabajador({Key? key}) : super(key: key);
@@ -145,6 +146,19 @@ class _EditarPerfilTrabajadorState extends State<EditarPerfilTrabajador> {
                   },
                   child: const Text('Editar Perfil'),
                 ),
+                SizedBox(height: 40.0,),
+                 ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChangePasswordForm()),
+                      ((route) => false),
+                    );
+                  },
+                  child: const Text('Cambiar Contraseña'),
+                ),
+                SizedBox(height: 40),
               ],
             ),
           ),
