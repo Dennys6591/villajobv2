@@ -151,6 +151,17 @@ class UserSearchDelegate extends SearchDelegate<String> {
             await doc.reference.delete();
           }
 
+          // Eliminar los contratos del empleador
+          QuerySnapshot contratosTrabajadorSnapshot2 = await FirebaseFirestore
+              .instance
+              .collection('contratos')
+              .where('empleadorId', isEqualTo: usuarioId)
+              .get();
+
+          for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot2.docs) {
+            await doc.reference.delete();
+          }
+
           // Eliminar el usuario de Firestore
           await FirebaseFirestore.instance
               .collection('usuarios')
