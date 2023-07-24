@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:villajob/pages/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:villajob/pages/trabajadores.dart';
 import 'login.dart';
 
 class MostrarContrato extends StatefulWidget {
@@ -79,8 +80,6 @@ class _MostrarContratoState extends State<MostrarContrato> {
     }
   }
 
-
-
   Future<String> obtenerNombreTrabajador(String trabajadorId) async {
     DocumentSnapshot trabajadorSnapshot = await FirebaseFirestore.instance
         .collection('usuarios')
@@ -97,38 +96,25 @@ class _MostrarContratoState extends State<MostrarContrato> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue, // Establecer el color principal
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
       home: Scaffold(
         appBar: AppBar(
-          title: Column(
+          backgroundColor: Colors.blue[700],
+          title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Contratos'),
+              Text('Contratos del trabajador', style: TextStyle(fontSize: 20)),
             ],
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut().then((value) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreem()),
-                    (route) => false,
-                  );
-                }).catchError((error) {
-                  print('Error al cerrar sesión: $error');
-                });
-              },
-              icon: Icon(Icons.logout),
-            ),
-          ],
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
         body: isLoading
             ? Center(
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               )
             : StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance

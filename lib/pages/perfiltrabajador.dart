@@ -5,9 +5,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'editarPerfil.dart';
-import 'mostrarContrato.dart';
-//import 'package:editarPerfil.dart';
+import 'changePass.dart';
+
+
 
 class PerfilTrabajador extends StatefulWidget {
   const PerfilTrabajador({Key? key, required String trabajadorId})
@@ -121,6 +121,7 @@ class _PerfilTrabajadorState extends State<PerfilTrabajador> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue[700],
         title: const Text("Perfil Trabajador"),
       ),
       body: Stack(
@@ -132,7 +133,7 @@ class _PerfilTrabajadorState extends State<PerfilTrabajador> {
               gradient: LinearGradient(
                 colors: [
                   Color.fromARGB(255, 47, 152, 233),
-                  Color.fromRGBO(236, 163, 249, 1)
+                  Color.fromRGBO(163, 140, 220, 0.757),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -197,33 +198,99 @@ class _PerfilTrabajadorState extends State<PerfilTrabajador> {
                 SizedBox(
                   height: 40.0,
                 ),
-                ElevatedButton(
+ ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EditarPerfilTrabajador()));
-                    // home: EditarPerfilTrabajador();
+                    mostrarDialogoEditarPerfil();
                   },
                   child: const Text('Editar Perfil'),
                 ),
-                SizedBox(height: 40),
-                ElevatedButton(
+                SizedBox(height: 40.0,),
+                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                MostrarContrato())); //poner navigator
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChangePasswordForm()),
+                      ((route) => false),
+                    );
                   },
-                  child: const Text('Contratos'),
+                  child: const Text('Cambiar Contraseña'),
                 ),
+                
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+    void mostrarDialogoEditarPerfil() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Editar Perfil'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                initialValue: nombre,
+                onChanged: (value) {
+                  nombre = value;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Nombre',
+                ),
+              ),
+              TextFormField(
+                initialValue: apellido,
+                onChanged: (value) {
+                  apellido = value;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Apellido',
+                ),
+              ),
+              TextFormField(
+                initialValue: telefono,
+                onChanged: (value) {
+                  telefono = value;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Teléfono',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                guardarCambios();
+                Navigator.of(context).pop();
+              },
+              child: Text('Guardar cambios'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void guardarCambios() {
+    FirebaseFirestore.instance.collection('usuarios').doc(trabajadorId).update({
+      'nombre': nombre,
+      'apellido': apellido,
+      'telefono': telefono,
+    });
+
+    setState(() {});
   }
 
   Future<void> seleccionarImagen() async {
@@ -266,3 +333,4 @@ class _PerfilTrabajadorState extends State<PerfilTrabajador> {
     }
   }
 }
+

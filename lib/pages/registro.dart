@@ -184,7 +184,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "REGISTRO",
+          "Registro de Usuario",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
@@ -195,7 +195,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
           gradient: LinearGradient(
             colors: [
               Color.fromARGB(255, 47, 152, 233),
-              Color.fromRGBO(236, 163, 249, 1),
+              Color.fromRGBO(163, 140, 220, 0.757),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -211,7 +211,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
             ),
             child: Column(
               children: <Widget>[
-                LogoWidget("assets/images/logo.png"),
+                LogoWidget("assets/images/logo.png",),
                 const SizedBox(height: 0.5),
                 reusableTextFiell(
                   "Ingrese Nombre",
@@ -260,7 +260,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                   children: <Widget>[
                     Container(
                       width: MediaQuery.of(context).size.width * 0.4,
-                      height: 60,
+                      height: 45,
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),

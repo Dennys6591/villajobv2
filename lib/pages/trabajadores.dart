@@ -4,6 +4,8 @@ import 'package:villajob/pages/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:villajob/pages/perfiltrabajador.dart';
 
+import 'mostrarContrato.dart';
+
 class TrabajadoresScreen extends StatefulWidget {
   const TrabajadoresScreen({Key? key});
 
@@ -48,10 +50,10 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
     return Scaffold(
         extendBodyBehindAppBar: true, //Extiende el widget detras del appbar
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.blue[700],
           elevation: 0,
           title: isLoading
-              ? Text(
+              ? const Text(
                   'Cargando...', // Mostrar texto de carga mientras se obtiene el valor de trabajadorId
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 )
@@ -62,7 +64,7 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                       .get(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Text(
+                      return const Text(
                         'Cargando...', // Mostrar texto de carga mientras se obtiene la información del trabajador
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
@@ -81,112 +83,188 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                     final trabajadorNombre = userData['nombre'];
                     final trabajadorApellido = userData['apellido'];
 
-                    return Text(
-                      'Trabajador: $trabajadorNombre $trabajadorApellido',
-                      style:
-                          TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                    return Container(
+                      height: 40,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: FittedBox(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.hail),
+                            const SizedBox(width: 10),
+                            Text(
+                              '¡Bienvenido $trabajadorNombre $trabajadorApellido!',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),
           actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'eliminarCuenta') {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Confirmar eliminación de cuenta'),
-                      content: Text(
-                          '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
-                      actions: [
-                        TextButton(
-                          child: Text('Cancelar'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text('Eliminar cuenta'),
-                          onPressed: () {
-                            // Obtener los datos del usuario actual
-                            final userData = FirebaseAuth.instance.currentUser;
-                            final solicitudRef = FirebaseFirestore.instance
-                                .collection('solicitud_eliminar_cuenta');
-                            final usuariosRef = FirebaseFirestore.instance
-                                .collection('usuarios');
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'eliminarCuenta') {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Confirmar eliminación de cuenta'),
+                        content: Text(
+                            '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
+                        actions: [
+                          TextButton(
+                            child: Text('Cancelar'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: Text('Eliminar cuenta'),
+                            onPressed: () {
+                              // Obtener los datos del usuario actual
+                              final userData =
+                                  FirebaseAuth.instance.currentUser;
+                              final solicitudRef = FirebaseFirestore.instance
+                                  .collection('solicitud_eliminar_cuenta');
+                              final usuariosRef = FirebaseFirestore.instance
+                                  .collection('usuarios');
 
-                            // Obtener el nombre y el ID del usuario de la colección "usuarios"
-                            usuariosRef.doc(trabajadorId).get().then((snapshot) {
-                              if (snapshot.exists) {
-                                final nombre = snapshot.data()?['nombre'];
-                                final id = snapshot.data()?['id'];
-                                final apellido = snapshot.data()?['apellido'];
+                              // Obtener el nombre y el ID del usuario de la colección "usuarios"
+                              usuariosRef
+                                  .doc(trabajadorId)
+                                  .get()
+                                  .then((snapshot) {
+                                if (snapshot.exists) {
+                                  final nombre = snapshot.data()?['nombre'];
+                                  final id = snapshot.data()?['id'];
+                                  final apellido = snapshot.data()?['apellido'];
 
-                                // Guardar los datos de la solicitud en Firestore
-                                solicitudRef.add({
-                                  'usuarioId': userData?.uid,
-                                  'email': userData?.email,
-                                  'nombre': nombre,
-                                  'apellido': apellido,
-                                  'id': id,
-                                  'fecha': DateTime.now(),
-                                }).then((_) {
-                                  // Cerrar todos los diálogos anteriores y mostrar el mensaje de confirmación
-                                  Navigator.of(context)
-                                      .popUntil((route) => route.isFirst);
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Solicitud enviada'),
-                                        content: Text(
-                                            'Tu solicitud para eliminar la cuenta ha sido enviada.'),
-                                        actions: [
-                                          TextButton(
-                                            child: Text('Cerrar'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                }).catchError((error) {
-                                  // Manejar el error si no se puede guardar la solicitud
+                                  // Guardar los datos de la solicitud en Firestore
+                                  solicitudRef.add({
+                                    'usuarioId': userData?.uid,
+                                    'email': userData?.email,
+                                    'nombre': nombre,
+                                    'apellido': apellido,
+                                    'id': id,
+                                    'fecha': DateTime.now(),
+                                  }).then((_) {
+                                    // Cerrar todos los diálogos anteriores y mostrar el mensaje de confirmación
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst);
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Solicitud enviada'),
+                                          content: Text(
+                                              'Tu solicitud para eliminar la cuenta ha sido enviada.'),
+                                          actions: [
+                                            TextButton(
+                                              child: Text('Cerrar'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }).catchError((error) {
+                                    // Manejar el error si no se puede guardar la solicitud
+                                    print(
+                                        'Error al guardar la solicitud: $error');
+                                    // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
+                                  });
+                                } else {
+                                  // El documento del usuario no existe en la colección "usuarios"
                                   print(
-                                      'Error al guardar la solicitud: $error');
+                                      'Error: No se encontró el usuario en la colección "usuarios".');
                                   // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
-                                });
-                              } else {
-                                // El documento del usuario no existe en la colección "usuarios"
+                                }
+                              }).catchError((error) {
+                                // Manejar el error si no se puede obtener los datos del usuario
                                 print(
-                                    'Error: No se encontró el usuario en la colección "usuarios".');
+                                    'Error al obtener los datos del usuario: $error');
                                 // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
-                              }
-                            }).catchError((error) {
-                              // Manejar el error si no se puede obtener los datos del usuario
-                              print(
-                                  'Error al obtener los datos del usuario: $error');
-                              // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
-                            });
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'eliminarCuenta',
-                child: Text('Solicitar eliminación de cuenta'),
+                              });
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: 'eliminarCuenta',
+                  child: Text('Solicitar eliminación de cuenta'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.person_outline),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PerfilTrabajador(trabajadorId: trabajadorId)),
+                      );
+                    },
+                  ),
+                  Text('Perfil', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.work),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MostrarContrato()),
+                      );
+                    },
+                  ),
+                  Text('Contratos', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.exit_to_app),
+                    onPressed: () {
+                      print("Saliendo");
+                      FirebaseAuth.instance.signOut().then((value) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreem()),
+                        );
+                      });
+                    },
+                  ),
+                  Text('Salir', style: TextStyle(fontSize: 12)),
+                ],
               ),
             ],
           ),
-        ],
         ),
         body: Stack(
           children: [
@@ -196,15 +274,18 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
               decoration: const BoxDecoration(
                   gradient: LinearGradient(colors: [
                 Color.fromARGB(255, 47, 152, 233),
-                Color.fromRGBO(236, 163, 249, 1)
+                Color.fromRGBO(163, 140, 220, 0.757),
               ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
               child: Column(
                 children: [
+                  const SizedBox(height: 20),
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collectionGroup('publicaciones')
-                          .where('empleadorEmail', isNotEqualTo: FirebaseAuth.instance.currentUser!.email)
+                          .where('empleadorEmail',
+                              isNotEqualTo:
+                                  FirebaseAuth.instance.currentUser!.email)
                           .where('bloqueada', isEqualTo: false)
                           .snapshots(),
                       builder: (context, snapshot) {
@@ -314,43 +395,6 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                 ],
               ),
             ),
-            Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  child: BottomAppBar(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.person_outline),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => PerfilTrabajador(
-                                      trabajadorId: trabajadorId)),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.exit_to_app),
-                          onPressed: () {
-                            print("Saliendo");
-                            FirebaseAuth.instance.signOut().then((value) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LoginScreem()),
-                              );
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
           ],
         ));
   }

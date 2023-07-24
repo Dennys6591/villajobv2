@@ -48,7 +48,7 @@ Future passwordReset() async {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Restablecer contraseña'),
-        backgroundColor: Colors.deepPurple[200],
+        backgroundColor: Colors.blue[700],
         elevation: 0,
       ),
       body: Column(
@@ -92,7 +92,7 @@ Future passwordReset() async {
 
         MaterialButton(onPressed: passwordReset,
         child: Text('Reiniciar Contraseña'),
-        color: Colors.deepPurple[200],
+        color: Colors.blue[700],
         textColor: Colors.white,
         ),
         ],

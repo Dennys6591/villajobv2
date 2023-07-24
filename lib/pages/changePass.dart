@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:villajob/pages/editarPerfil.dart';
 import 'package:villajob/pages/login.dart';
 import 'package:villajob/pages/perfiltrabajador.dart';
 
@@ -49,6 +48,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
   Widget build(BuildContext context) {
     return Scaffold(
        appBar: AppBar(
+        backgroundColor: Colors.blue[700],
         title: const Text("Cambiar contraseña"),
       ),
         body: Container(
@@ -58,13 +58,14 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
         gradient: LinearGradient(
           colors: [
             Color.fromARGB(255, 47, 152, 233),
-            Color.fromRGBO(236, 163, 249, 1),
+            Color.fromRGBO(163, 140, 220, 0.757),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
       ),
       child: Form(
+
         key: _formKey,
         child: Center(
           child: Column(
