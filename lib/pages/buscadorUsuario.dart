@@ -115,68 +115,60 @@ class UserSearchDelegate extends SearchDelegate<String> {
     );
   }
 
-  void eliminarUsuarioCompleto(String correo, String userId, String id) async {
+  void eliminarUsuarioCompleto(
+      String correo, String userId, String id) async {
     try {
-      // Eliminar el usuario de Firebase Authentication
-      User? user = await FirebaseAuth.instance.currentUser;
-      if (user != null && user.uid == userId) {
-        await user.delete();
-        print('Usuario eliminado de Firebase Authentication exitosamente.');
-      } else {
-        print(
-            'No se encontró un usuario con el ID especificado en Firebase Authentication.');
-      }
-
-      // Consultar el usuario por correo electrónico
+      // Consultar los usuarios por correo electrónico
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('usuarios')
           .where('email', isEqualTo: correo)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        final usuarioId = querySnapshot.docs[0].id;
+        for (QueryDocumentSnapshot usuarioDoc in querySnapshot.docs) {
+          final usuarioId = usuarioDoc.id;
 
-        // Eliminar las publicaciones del empleador
-        QuerySnapshot publicacionesEmpleadorSnapshot = await FirebaseFirestore
-            .instance
-            .collection('publicaciones')
-            .where('empleadorId', isEqualTo: id)
-            .get();
+          // Eliminar las publicaciones del empleador
+          QuerySnapshot publicacionesEmpleadorSnapshot = await FirebaseFirestore
+              .instance
+              .collection('publicaciones')
+              .where('empleadorId', isEqualTo: usuarioId)
+              .get();
 
-        for (QueryDocumentSnapshot doc in publicacionesEmpleadorSnapshot.docs) {
-          await doc.reference.delete();
-        }
+          for (QueryDocumentSnapshot doc
+              in publicacionesEmpleadorSnapshot.docs) {
+            await doc.reference.delete();
+          }
 
-        // Eliminar los contratos del trabajador
-        QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore
-            .instance
-            .collection('contratos')
-            .where('trabajadorId', isEqualTo: id)
-            .get();
+          // Eliminar los contratos del trabajador
+          QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore
+              .instance
+              .collection('contratos')
+              .where('trabajadorId', isEqualTo: usuarioId)
+              .get();
 
-        for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
-          await doc.reference.delete();
-        }
+          for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
+            await doc.reference.delete();
+          }
 
-        // Eliminar el usuario de Firestore
-        await FirebaseFirestore.instance
-            .collection('usuarios')
-            .doc(usuarioId)
-            .delete();
+          // Eliminar el usuario de Firestore
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(usuarioId)
+              .delete();
 
-        // Eliminar la solicitud de Firestore
-        await FirebaseFirestore.instance
+          // Eliminar la solicitud de Firestore
+          await FirebaseFirestore.instance
             .collection('solicitud_eliminar_cuenta')
             .doc(id)
             .delete();
 
-        print('Usuario eliminado exitosamente.');
+          print('Usuario eliminado exitosamente.');
+        }
       } else {
         print(
             'No se encontró ningún usuario con el correo electrónico especificado.');
       }
-
-      await FirebaseAuth.instance.signOut();
     } catch (e) {
       print('Error al eliminar el usuario: $e');
     }
