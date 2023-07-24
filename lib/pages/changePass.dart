@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:villajob/pages/editarPerfil.dart';
-import 'package:villajob/pages/login.dart';
-import 'package:villajob/pages/perfiltrabajador.dart';
 
 import '../widgets_reutilizables/reutilizables.dart';
 
@@ -15,6 +12,49 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
   final _formKey = GlobalKey<FormState>();
   final _newPasswordController = TextEditingController();
 
+  mostrarConfimacion() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmación'),
+          content: const Text('¿Está seguro que desea cambiar su contraseña?'),
+          actions: [
+            MaterialButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              disabledColor: Colors.grey,
+              elevation: 0,
+              color: Colors.deepPurple,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+            MaterialButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              disabledColor: Colors.grey,
+              elevation: 0,
+              color: Colors.deepPurple,
+              onPressed: () {
+                Navigator.pop(context);
+                _changePassword();
+              },
+              child: const Text(
+                'Aceptar',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _changePassword() async {
     if (_formKey.currentState!.validate()) {
       String newPassword = _newPasswordController.text.trim();
@@ -24,11 +64,13 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
         if (user != null) {
           await user.updatePassword(newPassword);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Contraseña actualizada exitosamente')),
+            const SnackBar(
+                content: Text('Contraseña actualizada exitosamente')),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No se pudo encontrar al usuario actual')),
+            const SnackBar(
+                content: Text('No se pudo encontrar al usuario actual')),
           );
         }
       } catch (e) {
@@ -48,51 +90,61 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
-        title: const Text("Cambiar contraseña"),
-      ),
+        appBar: AppBar(
+          title: const Text("Cambiar contraseña"),
+          backgroundColor: const Color.fromRGBO(63, 63, 156, 1),
+        ),
         body: Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 47, 152, 233),
-            Color.fromRGBO(236, 163, 249, 1),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Form(
-        key: _formKey,
-        child: Center(
-          child: Column(
-            children: [
-              reusableTextFiell(
-                "Nueva Contraseña",
-                Icons.password,
-                false,
-                _newPasswordController,
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _changePassword,
-                child: Text('Cambiar Contraseña'),
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreem()));
-                },
-                child: Text('Salir'),
-              ),
-            ],
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Ingrese su nueva contraseña',
+                  style: TextStyle(fontSize: 18, color: Colors.black54),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: reusableTextFiell(
+                    "Nueva Contraseña",
+                    Icons.password,
+                    false,
+                    _newPasswordController,
+                  ),
+                ),
+                MaterialButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  disabledColor: Colors.grey,
+                  elevation: 0,
+                  color: Colors.deepPurple,
+                  onPressed: () {
+                    if (_newPasswordController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Ingrese la nueva contraseña')),
+                      );
+                    } else if (_newPasswordController.text.length < 6) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'La contraseña debe tener al menos 6 caracteres')),
+                      );
+                    } else {
+                      mostrarConfimacion();
+                    }
+                  },
+                  child: const Text(
+                    'Cambiar contraseña',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
-    ));
+        ));
   }
 }

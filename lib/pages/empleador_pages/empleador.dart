@@ -1,28 +1,63 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:villajob/pages/empleador_pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:villajob/pages/trabajadores_pages/inicio_page.dart';
-import 'package:villajob/pages/trabajadores_pages/mostrarContrato.dart';
-import 'package:villajob/pages/trabajadores_pages/perfiltrabajador.dart';
+import 'package:villajob/pages/registroPubli.dart';
 import 'package:villajob/pages/trabajadores_pages/salir_page.dart';
 
-class TrabajadoresScreen extends StatefulWidget {
-  const TrabajadoresScreen({Key? key});
+import 'contratos.dart';
+
+class EmpleadoresScreen extends StatefulWidget {
+  const EmpleadoresScreen({Key? key});
 
   @override
-  State<TrabajadoresScreen> createState() => _TrabajadoresScreenState();
+  State<EmpleadoresScreen> createState() => _EmpleadoresScreenState();
 }
 
-class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
-  late String trabajadorId = '';
-  bool isLoading = true;
+class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
+  late String empleadorId;
+  late bool isLoading = true;
+  late Stream<QuerySnapshot<Map<String, dynamic>>> trabajadoresStream;
+  String searchQuery = '';
+  late String trabajadorId;
+  double promedioCalificaciones = 0.0;
   var _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    obtenerEmpleadorId();
     obtenerTrabajadorId();
+  }
+
+  void obtenerEmpleadorId() async {
+    // Obtener el ID del empleador actualmente autenticado
+    String? empleadorEmail = FirebaseAuth.instance.currentUser!.email;
+
+    // Obtener el documento del empleador desde la colección de usuarios
+    FirebaseFirestore.instance
+        .collection('usuarios')
+        .where('email', isEqualTo: empleadorEmail)
+        .get()
+        .then((QuerySnapshot snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        empleadorId = snapshot.docs[0].id;
+      }
+      setState(() {
+        isLoading = false;
+        trabajadoresStream = FirebaseFirestore.instance
+            .collection('usuarios')
+            .where('id', isGreaterThanOrEqualTo: 'T')
+            .where('id', isLessThan: 'U')
+            .snapshots();
+      });
+    }).catchError((error) {
+      print('Error al obtener el trabajador: $error');
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
   void obtenerTrabajadorId() {
@@ -34,11 +69,11 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
         .get()
         .then((QuerySnapshot snapshot) {
       if (snapshot.docs.isNotEmpty) {
-        trabajadorId = snapshot.docs[0].id;
+        setState(() {
+          trabajadorId = snapshot.docs[0].id;
+          isLoading = false;
+        });
       }
-      setState(() {
-        isLoading = false;
-      });
     }).catchError((error) {
       print('Error al obtener el trabajador: $error');
       setState(() {
@@ -47,10 +82,38 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
     });
   }
 
+  // void calcularPromedioCalificaciones(String trabajadorId) {
+  //   double promedio = 0.0;
+  //   int cantidadCalificaciones = 0;
+
+  //   FirebaseFirestore.instance
+  //       .collection('contratos')
+  //       .where('trabajadorId', isEqualTo: trabajadorId)
+  //       .where('estado', isEqualTo: 'cerrado')
+  //       .get()
+  //       .then((QuerySnapshot snapshot) {
+  //     for (var doc in snapshot.docs) {
+  //       if (doc['calificacion'] != null) {
+  //         promedio += doc['calificacion'];
+  //         cantidadCalificaciones++;
+  //       }
+  //     }
+
+  //     if (cantidadCalificaciones > 0) {
+  //       promedio = promedio / cantidadCalificaciones;
+  //     }
+
+  //     setState(() {
+  //       promedioCalificaciones = promedio;
+  //     });
+  //   }).catchError((error) {
+  //     print('Error al obtener los contratos: $error');
+  //   });
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // extendBodyBehindAppBar: true, //Extiende el widget detras del appbar
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(63, 63, 156, 1),
         elevation: 0,
@@ -62,7 +125,7 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
             : FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
                     .collection('usuarios')
-                    .doc(trabajadorId)
+                    .doc(empleadorId)
                     .get(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -76,25 +139,30 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                     return const Text(
                       'Error al cargar los datos',
                       style:
-                          TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     );
                   }
 
                   final userData =
                       snapshot.data!.data() as Map<String, dynamic>;
-                  final trabajadorNombre = userData['nombre'];
-                  final trabajadorApellido = userData['apellido'];
+                  final empleadorNombre = userData['nombre'];
+                  final empleadorApellido = userData['apellido'];
 
-                  return Row(
-                    children: [
-                      const Icon(Icons.work_outline),
-                      const SizedBox(width: 10),
-                      Text(
-                        '¡Bienvenido $trabajadorNombre $trabajadorApellido!',
-                        style: const TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                  return Container(
+                    height: 40,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: FittedBox(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.handshake_outlined),
+                          const SizedBox(width: 10),
+                          Text(
+                            '¡Bienvenido $empleadorNombre $empleadorApellido!',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   );
                 },
               ),
@@ -107,9 +175,6 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text('Confirmar eliminación de cuenta'),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
                       content: const Text(
                           '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'),
                       actions: [
@@ -122,16 +187,14 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                         TextButton(
                           child: const Text('Eliminar cuenta'),
                           onPressed: () {
-                            // Obtener los datos del usuario actual
                             final userData = FirebaseAuth.instance.currentUser;
                             final solicitudRef = FirebaseFirestore.instance
                                 .collection('solicitud_eliminar_cuenta');
                             final usuariosRef = FirebaseFirestore.instance
                                 .collection('usuarios');
 
-                            // Obtener el nombre y el ID del usuario de la colección "usuarios"
                             usuariosRef
-                                .doc(trabajadorId)
+                                .doc(userData?.uid)
                                 .get()
                                 .then((snapshot) {
                               if (snapshot.exists) {
@@ -182,7 +245,7 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                                 // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
                               }
                             }).catchError((error) {
-                              // Manejar el error si no se puede obtener los datos del usuario
+                              // Manejar el error si no se pueden obtener los datos del usuario
                               print(
                                   'Error al obtener los datos del usuario: $error');
                               // Mostrar un diálogo o una notificación para informar al usuario sobre el error.
@@ -193,6 +256,8 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                     );
                   },
                 );
+              } else if (value == 'verPublicacionesEliminadas') {
+                mostrarPublicacionesEliminadas(context, empleadorId);
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -200,21 +265,34 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
                 value: 'eliminarCuenta',
                 child: Text('Solicitar eliminación de cuenta'),
               ),
+              const PopupMenuItem<String>(
+                value: 'verPublicacionesEliminadas',
+                child: Text('Ver publicaciones eliminadas'),
+              ),
             ],
           ),
         ],
+        ///////////////////////////////////////////////
       ),
-      body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.grey[200],
-          child: _currentIndex == 0
-              ? const HomePage()
-              : _currentIndex == 1
-                  ? PerfilTrabajador(trabajadorId: trabajadorId)
-                  : _currentIndex == 2
-                      ? MostrarContrato()
-                      : const SalirPage()),
+      ////////////////////////////////////////////body
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context)
+              .unfocus(); // Cierra el teclado virtual al tocar en cualquier lugar de la pantalla
+        },
+        child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            color: Colors.grey[200],
+            child: _currentIndex == 0
+                ? const HomeEmpleadorPage()
+                : _currentIndex == 1
+                    ? const ContratosScreen()
+                    : _currentIndex == 2
+                        ? const RegistroPublicacionScreen()
+                        : const SalirPage()),
+      ),
+
       bottomNavigationBar: SalomonBottomBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
@@ -225,13 +303,13 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
             selectedColor: const Color.fromRGBO(63, 63, 156, 1),
           ),
           SalomonBottomBarItem(
-            icon: const Icon(Icons.person_outline),
-            title: const Text("Perfil"),
+            icon: const Icon(Icons.file_present_sharp),
+            title: const Text("Contratos"),
             selectedColor: const Color.fromRGBO(63, 63, 156, 1),
           ),
           SalomonBottomBarItem(
-            icon: const Icon(Icons.file_present_sharp),
-            title: const Text("Contratos"),
+            icon: const Icon(Icons.note_add_outlined),
+            title: const Text("Crear contrato"),
             selectedColor: const Color.fromRGBO(63, 63, 156, 1),
           ),
           SalomonBottomBarItem(
@@ -241,6 +319,61 @@ class _TrabajadoresScreenState extends State<TrabajadoresScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void mostrarPublicacionesEliminadas(
+      BuildContext context, String empleadorId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('public_eliminada')
+              .where('empleadorId', isEqualTo: empleadorId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return const AlertDialog(
+                  content:
+                      Text('Error al cargar las publicaciones eliminadas'));
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const AlertDialog(
+                  content: Text('No hay publicaciones eliminadas'));
+            }
+
+            return AlertDialog(
+              content: ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final publicacion = snapshot.data!.docs[index];
+                  final descripcion = publicacion['descripcion'];
+                  final motivo = publicacion['motivo'];
+
+                  return ListTile(
+                    title: Text('Descripción: $descripcion'),
+                    subtitle: Text('Motivo: $motivo'),
+                  );
+                },
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cerrar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

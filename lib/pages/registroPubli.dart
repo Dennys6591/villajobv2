@@ -23,29 +23,33 @@ class _RegistroPublicacionScreenState extends State<RegistroPublicacionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Registro de Publicación"),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            TextField(
-              controller: _descripcionController,
-              decoration: InputDecoration(labelText: "Descripción"),
-            ),
-            TextField(
-              controller: _precioController,
-              decoration: InputDecoration(labelText: "Precio"),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _registrarPublicacion,
-              child: const Text("Registrar"),
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          Text("Registro de Publicación"),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          TextField(
+            controller: _descripcionController,
+            decoration: InputDecoration(labelText: "Descripción"),
+          ),
+          TextField(
+            controller: _precioController,
+            decoration: InputDecoration(labelText: "Precio"),
+          ),
+          const SizedBox(height: 20),
+          MaterialButton(
+            onPressed: _registrarPublicacion,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            disabledColor: Colors.grey,
+            elevation: 0,
+            color: Colors.deepPurple,
+            textColor: Colors.white,
+            child: const Text('Registrar'),
+          ),
+        ],
       ),
     );
   }

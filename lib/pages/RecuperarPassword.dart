@@ -1,103 +1,122 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:villajob/widgets_reutilizables/auth_background.dart';
+import 'package:villajob/widgets_reutilizables/card_container.dart';
 
 class RecuperarPasswordScreen extends StatefulWidget {
   const RecuperarPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  State<RecuperarPasswordScreen> createState() => _RecuperarPasswordScreenState();
+  State<RecuperarPasswordScreen> createState() =>
+      _RecuperarPasswordScreenState();
 }
 
 class _RecuperarPasswordScreenState extends State<RecuperarPasswordScreen> {
   final _emailController = TextEditingController();
-  
-@override
-void dispose() {
-  _emailController.dispose();
-  super.dispose();
-}
 
-Future passwordReset() async {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future passwordReset() async {
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text.trim());
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _emailController.text.trim());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Se ha enviado un correo electrónico para restablecer la contraseña.'),
+        const SnackBar(
+          content: Text(
+              'Se ha enviado un correo electrónico para restablecer la contraseña.'),
         ),
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('No se encontró una cuenta para ese correo electrónico.'),
+          const SnackBar(
+            content:
+                Text('No se encontró una cuenta para ese correo electrónico.'),
           ),
         );
       } else if (e.code == 'invalid-email') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('El correo electrónico no es válido.'),
           ),
         );
+      }
     }
-  }  
-}
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Restablecer contraseña'),
-        backgroundColor: Colors.deepPurple[200],
-        elevation: 0,
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          child: Text(
-            'Ingrese su correo electrónico para obtener el link de reinicio de contraseña.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-            ),
-            ),
+        appBar: AppBar(
+          title: const Text('Restablecer contraseña'),
+          backgroundColor: const Color.fromRGBO(63, 63, 156, 1),
+          elevation: 0,
         ),
-       
-        SizedBox(height: 10),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          child: TextField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.deepPurple),
-              ),
-              hintText: 'Email',
-              fillColor: Colors.grey[200],
-              filled: true,
-              prefixIcon: Icon(Icons.email),
+        body: AuthBackground(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.22,
+                ),
+                CardContainer(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          'Ingrese su correo electrónico para obtener el link de reinicio de contraseña.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Colors.white),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Colors.deepPurple),
+                          ),
+                          hintText: 'Email',
+                          fillColor: Colors.grey[200],
+                          filled: true,
+                          prefixIcon: const Icon(
+                            Icons.email,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      MaterialButton(
+                        onPressed: passwordReset,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        disabledColor: Colors.grey,
+                        elevation: 0,
+                        color: Colors.deepPurple,
+                        textColor: Colors.white,
+                        child: const Text('Restablecer Contraseña'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-
-        SizedBox(height: 10),
-
-        MaterialButton(onPressed: passwordReset,
-        child: Text('Reiniciar Contraseña'),
-        color: Colors.deepPurple[200],
-        textColor: Colors.white,
-        ),
-        ],
-      )
-    );
+        ));
   }
 }
 
