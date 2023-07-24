@@ -133,7 +133,6 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                       ),
                     ),
                   );
-                  
                 },
               ),
         actions: [
@@ -245,7 +244,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
         ///////////////////////////////////////////////
       ),
       ////////////////////////////////////////////body
-    
+
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context)
@@ -268,11 +267,13 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
             padding: const EdgeInsets.only(top: 20),
             child: ListView(
               children: [
-                const Text('Lista de trabajadores', textAlign: TextAlign.center, 
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                const Text(
+                  'Lista de trabajadores',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 20),
                 TextField(
-
                   decoration: InputDecoration(
                     hintText: 'Buscar por nombre',
 
@@ -391,131 +392,151 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
       //////////////////////////////////fin body
       bottomNavigationBar: BottomAppBar(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
-              icon: Icon(Icons.folder),
-              onPressed: () {
-                // visualizar el contrato para darle la opcion de cerrarlo
-                //y calificar
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ContratosScreen()));
-              },
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.folder),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ContratosScreen()),
+                    );
+                  },
+                ),
+                Text('Contratos', style: TextStyle(fontSize: 12)),
+              ],
             ),
-            Text('Contratos', style: TextStyle(fontSize: 12)),
-            IconButton(
-              icon: Icon(Icons.add_to_photos),
-              onPressed: () {
-                // visualizar el contrato para darle la opcion de cerrarlo
-                //y calificar
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => RegistroPublicacionScreen()));
-              },
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.add_to_photos),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RegistroPublicacionScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Text('Nueva publicación', style: TextStyle(fontSize: 12)),
+              ],
             ),
-            Text('Nueva publicación', style: TextStyle(fontSize: 12)),
-
-            IconButton(
-              icon: Icon(Icons.exit_to_app),
-              onPressed: () {
-                print("Saliendo");
-                FirebaseAuth.instance.signOut().then((value) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreem()),
-                  );
-                });
-              },
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  onPressed: () {
+                    print("Saliendo");
+                    FirebaseAuth.instance.signOut().then((value) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreem()),
+                      );
+                    });
+                  },
+                ),
+                Text('Salir', style: TextStyle(fontSize: 12)),
+              ],
             ),
-            Text('Salir', style: TextStyle(fontSize: 12)),
           ],
         ),
       ),
     );
   }
 
-  void mostrarPublicacionesEliminadas(BuildContext context, String empleadorId) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: SingleChildScrollView( // Agregar SingleChildScrollView aquí
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('public_eliminadas')
-                      .where('empleadorId', isEqualTo: empleadorId)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return Text('Error al cargar las publicaciones eliminadas');
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Text('No hay publicaciones eliminadas para este empleador');
-                    }
-
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        final publicacion = snapshot.data!.docs[index];
-                        final descripcion = publicacion['descripcion'];
-                        final motivo = publicacion['motivo'];
-
-                        return ListTile(
-                          title: Text('Descripción: $descripcion'),
-                          subtitle: Text('Motivo: $motivo'),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      child: Text('Cerrar'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+  void mostrarPublicacionesEliminadas(
+      BuildContext context, String empleadorId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
           ),
-        ),
-      );
-    },
-  );
-}
+          child: SingleChildScrollView(
+            // Agregar SingleChildScrollView aquí
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('public_eliminadas')
+                        .where('empleadorId', isEqualTo: empleadorId)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
 
+                      if (snapshot.hasError) {
+                        return Text(
+                            'Error al cargar las publicaciones eliminadas');
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return Text(
+                            'No hay publicaciones eliminadas para este empleador');
+                      }
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final publicacion = snapshot.data!.docs[index];
+                          final descripcion = publicacion['descripcion'];
+                          final motivo = publicacion['motivo'];
+
+                          return ListTile(
+                            title: Text('Descripción: $descripcion'),
+                            subtitle: Text('Motivo: $motivo'),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        child: Text('Cerrar'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
