@@ -433,15 +433,15 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
     );
   }
 
-  void mostrarPublicacionesEliminadas(
-      BuildContext context, String empleadorId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+  void mostrarPublicacionesEliminadas(BuildContext context, String empleadorId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: SingleChildScrollView( // Agregar SingleChildScrollView aquí
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -472,13 +472,11 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                     }
 
                     if (snapshot.hasError) {
-                      return Text(
-                          'Error al cargar las publicaciones eliminadas');
+                      return Text('Error al cargar las publicaciones eliminadas');
                     }
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Text(
-                          'No hay publicaciones eliminadas para este empleador');
+                      return Text('No hay publicaciones eliminadas para este empleador');
                     }
 
                     return ListView.builder(
@@ -514,8 +512,10 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
               ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 }
