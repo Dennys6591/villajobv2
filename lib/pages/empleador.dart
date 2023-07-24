@@ -84,7 +84,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blue[700],
         elevation: 0,
         title: isLoading
             ? const Text(
@@ -117,10 +117,23 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                   final empleadorNombre = userData['nombre'];
                   final empleadorApellido = userData['apellido'];
 
-                  return Text(
-                    'Bienvenido $empleadorNombre $empleadorApellido',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                  return Container(
+                    height: 40,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: FittedBox(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.handshake_outlined),
+                          const SizedBox(width: 10),
+                          Text(
+                            '¡Bienvenido $empleadorNombre $empleadorApellido!',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
+                  
                 },
               ),
         actions: [
@@ -232,6 +245,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
         ///////////////////////////////////////////////
       ),
       ////////////////////////////////////////////body
+    
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context)
@@ -244,17 +258,21 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
             gradient: LinearGradient(
               colors: [
                 Color.fromARGB(255, 47, 152, 233),
-                Color.fromRGBO(236, 163, 249, 1)
+                Color.fromRGBO(163, 140, 220, 0.757),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.only(top: 60),
+            padding: const EdgeInsets.only(top: 20),
             child: ListView(
               children: [
+                const Text('Lista de trabajadores', textAlign: TextAlign.center, 
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                const SizedBox(height: 20),
                 TextField(
+
                   decoration: InputDecoration(
                     hintText: 'Buscar por nombre',
 
@@ -281,7 +299,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                     });
                   },
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 isLoading
                     ? CircularProgressIndicator()
                     : StreamBuilder<QuerySnapshot>(
@@ -373,7 +391,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
       //////////////////////////////////fin body
       bottomNavigationBar: BottomAppBar(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
               icon: Icon(Icons.folder),
@@ -384,17 +402,18 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                     MaterialPageRoute(builder: (context) => ContratosScreen()));
               },
             ),
-            ElevatedButton(
-              child: Text("Crear Publicación"),
+            Text('Contratos', style: TextStyle(fontSize: 12)),
+            IconButton(
+              icon: Icon(Icons.add_to_photos),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RegistroPublicacionScreen(),
-                  ),
-                );
+                // visualizar el contrato para darle la opcion de cerrarlo
+                //y calificar
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => RegistroPublicacionScreen()));
               },
             ),
+            Text('Nueva publicación', style: TextStyle(fontSize: 12)),
+
             IconButton(
               icon: Icon(Icons.exit_to_app),
               onPressed: () {
@@ -407,6 +426,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                 });
               },
             ),
+            Text('Salir', style: TextStyle(fontSize: 12)),
           ],
         ),
       ),

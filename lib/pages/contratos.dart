@@ -146,10 +146,10 @@ class _ContratosScreenState extends State<ContratosScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blue[700],
         elevation: 0,
         title: isLoading
-            ? Text(
+            ? const Text(
                 'Cargando...',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               )
@@ -160,14 +160,14 @@ class _ContratosScreenState extends State<ContratosScreen> {
                     .get(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text(
+                    return const Text(
                       'Cargando...',
                       style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
                     );
                   }
                   if (snapshot.hasError || !snapshot.hasData) {
-                    return Text(
+                    return const Text(
                       'Error al cargar los datos',
                       style:
                           TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
@@ -178,12 +178,24 @@ class _ContratosScreenState extends State<ContratosScreen> {
                       snapshot.data!.data() as Map<String, dynamic>;
                   final empleadorNombre = userData['nombre'];
                   final empleadorApellido = userData['apellido'];
-
-                  return Text(
-                    'Contratos de: $empleadorNombre $empleadorApellido',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                  
+                  return Container(
+                    height: 40,
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: FittedBox(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.handshake_outlined),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Contratos de: $empleadorNombre $empleadorApellido',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
-                },
+                }
               ),
       ),
       body: Container(
@@ -192,7 +204,7 @@ class _ContratosScreenState extends State<ContratosScreen> {
         decoration: const BoxDecoration(
             gradient: LinearGradient(colors: [
           Color.fromARGB(255, 47, 152, 233),
-          Color.fromRGBO(236, 163, 249, 1)
+          Color.fromRGBO(163, 140, 220, 0.757),
         ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
         child: isLoading
             ? const Center(
@@ -305,19 +317,7 @@ class _ContratosScreenState extends State<ContratosScreen> {
                 },
               ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          FirebaseAuth.instance.signOut().then((value) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreem()),
-            );
-          }).catchError((error) {
-            print('Error al cerrar sesión: $error');
-          });
-        },
-        child: Icon(Icons.logout),
-      ),
+      
     );
   }
 }

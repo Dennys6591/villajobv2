@@ -79,7 +79,7 @@ class _LoginScreemState extends State<LoginScreem> {
           gradient: LinearGradient(
             colors: [
               Color.fromARGB(255, 47, 152, 233),
-              Color.fromRGBO(236, 163, 249, 1),
+              Color.fromRGBO(163, 140, 220, 0.757),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -165,14 +165,16 @@ class _LoginScreemState extends State<LoginScreem> {
         String? userType = usuario['userType'];
 
         if (userType == 'Trabajador') {
-          Navigator.push(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => TrabajadoresScreen()),
+            ((route) => false),
           );
         } else if (userType == 'Empleador') {
-          Navigator.push(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => EmpleadoresScreen()),
+            ((route) => false),
           );
         } else if (userType == 'Ambos') {
           mostrarDialogo();
@@ -183,7 +185,7 @@ class _LoginScreemState extends State<LoginScreem> {
           );
         }
       } else {
-        showErrorMessage('El usuario no existe o no tiene asignado un tipo de usuario');
+        showErrorMessage('El usuario no está registrado o el correo ingresado es incorrecto');
       }
     } catch (error) {
       Navigator.pop(context);
@@ -211,7 +213,7 @@ class _LoginScreemState extends State<LoginScreem> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("No tengo cuenta", style: TextStyle(color: Colors.white70)),
+        const Text("¿No tienes cuenta?", style: TextStyle(color: Colors.white70)),
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -220,7 +222,7 @@ class _LoginScreemState extends State<LoginScreem> {
             );
           },
           child: const Text(
-            "? REGISTRAR",
+            "REGISTRAR",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
@@ -242,7 +244,7 @@ class _LoginScreemState extends State<LoginScreem> {
             );
           },
           child: const Text(
-            " RECUPERAR",
+            " RESTABLECER",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),

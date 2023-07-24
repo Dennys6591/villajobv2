@@ -25,7 +25,8 @@ class _RegistroPublicacionScreenState extends State<RegistroPublicacionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Registro de Publicación"),
+        backgroundColor: Colors.blue[700],
+        title: const Text("Registro de Publicación", style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Container(
         padding: const EdgeInsets.all(20),
