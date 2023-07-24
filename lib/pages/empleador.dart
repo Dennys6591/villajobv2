@@ -246,7 +246,7 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                   },
                 );
               } else if (value == 'verPublicacionesEliminadas') {
-                mostrarPublicacionesEliminadas(context, empleadorId);
+                mostrarPublicacionesEliminadas(context);
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -458,87 +458,53 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
     );
   }
 
-  void mostrarPublicacionesEliminadas(
-      BuildContext context, String empleadorId) {
+  void mostrarPublicacionesEliminadas(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('public_eliminada')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Text('Error al cargar las publicaciones eliminadas');
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Text('No hay publicaciones eliminadas');
+            }
+
+            return AlertDialog(
+              content: ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final publicacion = snapshot.data!.docs[index];
+                  final descripcion = publicacion['descripcion'];
+                  final motivo = publicacion['motivo'];
+
+                  return Container(
+                    child: ListTile(
+                      title: Text('Descripción: $descripcion'),
+                      subtitle: Text('Motivo: $motivo'),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('public_eliminadas')
-                      .where('empleadorId', isEqualTo: empleadorId)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return Text(
-                          'Error al cargar las publicaciones eliminadas');
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Text(
-                          'No hay publicaciones eliminadas para este empleador');
-                    }
-
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        final publicacion = snapshot.data!.docs[index];
-                        final descripcion = publicacion['descripcion'];
-                        final motivo = publicacion['motivo'];
-
-                        return ListTile(
-                          title: Text('Descripción: $descripcion'),
-                          subtitle: Text('Motivo: $motivo'),
-                        );
-                      },
-                    );
+              actions: [
+                TextButton(
+                  child: Text('Cerrar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      child: Text('Cerrar'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
         );
       },
     );

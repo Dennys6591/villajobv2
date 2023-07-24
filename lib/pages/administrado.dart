@@ -155,8 +155,6 @@ class _adminScreenState extends State<adminScreen> {
                       final apellido = solicitud['apellido'];
                       final id = solicitud['id'];
 
-                      //
-
                       return Container(
                         child: ListTile(
                           title: Text('Nombre: $nombre - Apellido: $apellido'),
@@ -168,32 +166,9 @@ class _adminScreenState extends State<adminScreen> {
                               IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Eliminar usuario'),
-                                        content: Text(
-                                            '¿Estás seguro que desea eliminar al Usuario por completo?'),
-                                        actions: [
-                                          TextButton(
-                                            child: Text('Cancelar'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: Text('Eliminar'),
-                                            onPressed: () {
-                                              eliminarUsuarioCompleto(email,
-                                                  usuarioId, solicitud.id, id);
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
+                                  // Acción para eliminar la solicitud
+                                  eliminarUsuarioCompleto(
+                                      email, usuarioId, solicitud.id, id);
                                 },
                               ),
                             ],
@@ -240,8 +215,6 @@ class _adminScreenState extends State<adminScreen> {
                       final precio = publicacion['precio'];
                       final id = publicacion.id;
 
-                      //eliminarPublicacion(id, empleadorId);
-
                       return Container(
                         child: ListTile(
                           title: Text(
@@ -254,32 +227,8 @@ class _adminScreenState extends State<adminScreen> {
                               IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Eliminar publicacion'),
-                                        content: Text(
-                                            '¿Estás seguro que desea eliminar publicacion?'),
-                                        actions: [
-                                          TextButton(
-                                            child: Text('Cancelar'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: Text('Eliminar'),
-                                            onPressed: () {
-                                              eliminarPublicacion(
-                                                  id, empleadorId);
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
+                                  // Acción para eliminar la publicación
+                                  eliminarPublicacion(id, empleadorId);
                                 },
                               ),
                             ],
@@ -300,106 +249,115 @@ class _adminScreenState extends State<adminScreen> {
   void eliminarUsuarioCompleto(
       String correo, String userId, String solicitudId, String id) async {
     try {
-      // Consultar los usuarios por correo electrónico
+      // Eliminar el usuario de Firebase Authentication
+      User? user = await FirebaseAuth.instance.currentUser;
+      if (user != null && user.uid == userId) {
+        await user.delete();
+        print('Usuario eliminado de Firebase Authentication exitosamente.');
+      } else {
+        print(
+            'No se encontró un usuario con el ID especificado en Firebase Authentication.');
+      }
+
+      // Consultar el usuario por correo electrónico
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('usuarios')
           .where('email', isEqualTo: correo)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        for (QueryDocumentSnapshot usuarioDoc in querySnapshot.docs) {
-          final usuarioId = usuarioDoc.id;
+        final usuarioId = querySnapshot.docs[0].id;
 
-          // Eliminar las publicaciones del empleador
-          QuerySnapshot publicacionesEmpleadorSnapshot = await FirebaseFirestore
-              .instance
-              .collection('publicaciones')
-              .where('empleadorId', isEqualTo: usuarioId)
-              .get();
+        // Eliminar las publicaciones del empleador
+        QuerySnapshot publicacionesEmpleadorSnapshot = await FirebaseFirestore
+            .instance
+            .collection('publicaciones')
+            .where('empleadorId', isEqualTo: id)
+            .get();
 
-          for (QueryDocumentSnapshot doc
-              in publicacionesEmpleadorSnapshot.docs) {
-            await doc.reference.delete();
-          }
-
-          // Eliminar los contratos del trabajador
-          QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore
-              .instance
-              .collection('contratos')
-              .where('trabajadorId', isEqualTo: usuarioId)
-              .get();
-
-          for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
-            await doc.reference.delete();
-          }
-
-          // Eliminar el usuario de Firestore
-          await FirebaseFirestore.instance
-              .collection('usuarios')
-              .doc(usuarioId)
-              .delete();
-
-          // Eliminar la solicitud de Firestore
-          await FirebaseFirestore.instance
-              .collection('solicitud_eliminar_cuenta')
-              .doc(solicitudId)
-              .delete();
-
-          print('Usuario eliminado exitosamente.');
+        for (QueryDocumentSnapshot doc in publicacionesEmpleadorSnapshot.docs) {
+          await doc.reference.delete();
         }
+
+        // Eliminar los contratos del trabajador
+        QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore
+            .instance
+            .collection('contratos')
+            .where('trabajadorId', isEqualTo: id)
+            .get();
+
+        for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
+          await doc.reference.delete();
+        }
+
+        // Eliminar el usuario de Firestore
+        await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(usuarioId)
+            .delete();
+
+        // Eliminar la solicitud de Firestore
+        await FirebaseFirestore.instance
+            .collection('solicitud_eliminar_cuenta')
+            .doc(solicitudId)
+            .delete();
+
+        print('Usuario eliminado exitosamente.');
       } else {
         print(
             'No se encontró ningún usuario con el correo electrónico especificado.');
       }
+
+      await FirebaseAuth.instance.signOut();
     } catch (e) {
       print('Error al eliminar el usuario: $e');
     }
   }
+}
 
-  void eliminarPublicacion(String id, String empleadorId) async {
-    try {
-      // Obtener la referencia de la publicación específica
-      DocumentSnapshot publicacionSnapshot = await FirebaseFirestore.instance
-          .collection('publicaciones')
-          .doc(id)
-          .get();
+void eliminarPublicacion(String id, String empleadorId) async {
+  try {
+    // Obtener la referencia de la publicación específica
+    DocumentSnapshot publicacionSnapshot = await FirebaseFirestore.instance
+        .collection('publicaciones')
+        .doc(id)
+        .get();
 
-      if (publicacionSnapshot.exists) {
-        // Guardar empleadorId y motivo en la colección "public_eliminadas"
-        String empleadorId = publicacionSnapshot['empleadorId'];
-        String descripcion = publicacionSnapshot['descripcion'];
-        String motivo =
-            'Se eliminó porque incumple con nuestras normas. Vuelva a publicar.';
+    if (publicacionSnapshot.exists) {
+      // Guardar empleadorId y motivo en la colección "public_eliminadas"
+      String empleadorId = publicacionSnapshot['empleadorId'];
+      String descripcion = publicacionSnapshot['descripcion'];
+      String motivo =
+          'Se eliminó porque incumple con nuestras normas. Vuelva a publicar.';
 
-        await FirebaseFirestore.instance.collection('public_eliminadas').add({
-          'empleadorId': empleadorId,
-          'motivo': motivo,
-          'descripcion': descripcion,
-        });
+      await FirebaseFirestore.instance.collection('public_eliminadas').add({
+        'empleadorId': empleadorId,
+        'motivo': motivo,
+        'descripcion': descripcion,
+      });
 
-        // Eliminar la publicación de la colección "publicaciones"
-        await publicacionSnapshot.reference.delete();
+      // Eliminar la publicación de la colección "publicaciones"
+      await publicacionSnapshot.reference.delete();
 
-        print('Publicación eliminada exitosamente.');
-      } else {
-        print('No se encontró ninguna publicación con el ID especificado.');
-      }
-
-      // Eliminar los contratos del trabajador
-      QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore
-          .instance
-          .collection('contratos')
-          .where('empleadorId', isEqualTo: empleadorId)
-          .get();
-
-      for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
-        await doc.reference.delete();
-      }
-    } catch (e) {
-      print('Error al eliminar la publicación: $e');
+      print('Publicación eliminada exitosamente.');
+    } else {
+      print('No se encontró ninguna publicación con el ID especificado.');
     }
+
+    // Eliminar los contratos del trabajador
+    QuerySnapshot contratosTrabajadorSnapshot = await FirebaseFirestore.instance
+        .collection('contratos')
+        .where('empleadorId', isEqualTo: empleadorId)
+        .get();
+
+    for (QueryDocumentSnapshot doc in contratosTrabajadorSnapshot.docs) {
+      await doc.reference.delete();
+    }
+  } catch (e) {
+    print('Error al eliminar la publicación: $e');
   }
 }
+
 /*
  void eliminarUsuarioPorId(String userId) {
     FirebaseAuth.instance.currentUser!.delete().then((_) {
