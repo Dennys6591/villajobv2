@@ -4,8 +4,8 @@ Image LogoWidget(String imageName) {
   return Image.asset(
     imageName,
     fit: BoxFit.fitWidth,
-    width: 180,
-    height: 180,
+    width: 240,
+    height: 240,
     color: Colors.white,
   );
 }
@@ -17,24 +17,21 @@ TextField reusableTextFiell(String text, IconData icon, bool isPasswordType,
     obscureText: isPasswordType,
     enableSuggestions: !isPasswordType,
     autocorrect: !isPasswordType,
-    cursorColor: Colors.black,
-    style: const TextStyle(color: Colors.black),
+    cursorColor: Colors.white,
+    style: TextStyle(color: Colors.white.withOpacity(0.9)),
     decoration: InputDecoration(
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.white),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.deepPurple),
-      ),
-      hintText: text,
-      fillColor: Colors.grey[200],
-      filled: true,
       prefixIcon: Icon(
         icon,
-        color: Colors.deepPurple,
+        color: Colors.white70,
       ),
+      labelText: text,
+      labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+      filled: true,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      fillColor: Colors.white.withOpacity(0.3),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30.0),
+          borderSide: const BorderSide(width: 0, style: BorderStyle.none)),
     ),
     keyboardType: isPasswordType
         ? TextInputType.visiblePassword
