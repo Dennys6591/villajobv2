@@ -70,12 +70,44 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
           trabajadorId = snapshot.docs[0].id;
           isLoading = false;
         });
+
+        // Obtener el promedio una vez que se tenga el trabajadorId
+        calcularPromedioCalificaciones(trabajadorId);
       }
     }).catchError((error) {
       print('Error al obtener el trabajador: $error');
       setState(() {
         isLoading = false;
       });
+    });
+  }
+
+  void calcularPromedioCalificaciones(String trabajadorId) {
+    double promedio = 0.0;
+    int cantidadCalificaciones = 0;
+
+    FirebaseFirestore.instance
+        .collection('contratos')
+        .where('trabajadorId', isEqualTo: trabajadorId)
+        .where('estado', isEqualTo: 'cerrado')
+        .get()
+        .then((QuerySnapshot snapshot) {
+      for (var doc in snapshot.docs) {
+        if (doc['calificacion'] != null) {
+          promedio += doc['calificacion'];
+          cantidadCalificaciones++;
+        }
+      }
+
+      if (cantidadCalificaciones > 0) {
+        promedio = promedio / cantidadCalificaciones;
+      }
+
+      setState(() {
+        promedioCalificaciones = promedio;
+      });
+    }).catchError((error) {
+      print('Error al obtener los contratos: $error');
     });
   }
 
@@ -345,10 +377,23 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                                         Column(
                                           children: [
                                             Text(
-                                              '${trabajador['nombre']} ${trabajador['apellido']} \nTeléfono: ${trabajador['telefono']} \nCédula: ${trabajador['cedula']} \nCalificacion: ${trabajador['promedioCalificaciones']}',
+                                              '${trabajador['nombre']} ${trabajador['apellido']} \nTeléfono: ${trabajador['telefono']} \nCédula: ${trabajador['cedula']}',
                                               style: TextStyle(fontSize: 12),
                                             ),
                                             const SizedBox(height: 5),
+                                            Row(
+                                              children: [
+                                                Text('Calificación:',
+                                                    style: TextStyle(
+                                                        fontSize: 12)),
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                                Icon(Icons.star,
+                                                    color: Colors.yellow),
+                                              ],
+                                            ),
                                           ],
                                         ),
                                       ],
