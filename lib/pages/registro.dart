@@ -41,7 +41,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Error'),
-          content: const Text('Ingrese un nombre válido sin caracteres especiales.'),
+          content:
+              const Text('Ingrese un nombre válido sin caracteres especiales.'),
           actions: [
             TextButton(
               child: const Text('Aceptar'),
@@ -60,7 +61,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Error'),
-          content: const Text('Ingrese un apellido válido sin caracteres especiales.'),
+          content: const Text(
+              'Ingrese un apellido válido sin caracteres especiales.'),
           actions: [
             TextButton(
               child: const Text('Aceptar'),
@@ -98,7 +100,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Error'),
-          content: const Text('Ingrese un número de teléfono válido (10 dígitos).'),
+          content:
+              const Text('Ingrese un número de teléfono válido (10 dígitos).'),
           actions: [
             TextButton(
               child: const Text('Aceptar'),
@@ -121,7 +124,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
     }
 
     try {
-      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailTextController.text,
         password: _passwordTextController.text,
       );
@@ -129,22 +133,26 @@ class _RegistroScreenState extends State<RegistroScreen> {
       print("Usuario Creado");
 
       if (_selectedOption == 'Trabajador') {
-        id = 'T${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+        id =
+            'T${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
       } else if (_selectedOption == 'Empleador') {
-        id = 'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+        id =
+            'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
       } else if (_selectedOption == 'Ambos') {
-        id = 'T${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
-        idE = 'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
-      
-      await FirebaseFirestore.instance.collection('usuarios').doc(idE).set({
-        'nombre': _nombreTextController.text,
-        'apellido': _apellidoTextController.text,
-        'email': _emailTextController.text,
-        'cedula': _cedulaTextController.text,
-        'telefono': _telefonoTextController.text,
-        'opcion': _selectedOption,
-        'id': idE,
-      });
+        id =
+            'T${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+        idE =
+            'E${DateTime.now().microsecondsSinceEpoch.toString().padLeft(6, '0')}';
+
+        await FirebaseFirestore.instance.collection('usuarios').doc(idE).set({
+          'nombre': _nombreTextController.text,
+          'apellido': _apellidoTextController.text,
+          'email': _emailTextController.text,
+          'cedula': _cedulaTextController.text,
+          'telefono': _telefonoTextController.text,
+          'opcion': _selectedOption,
+          'id': idE,
+        });
       }
 
       await FirebaseFirestore.instance.collection('usuarios').doc(id).set({
@@ -155,6 +163,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
         'telefono': _telefonoTextController.text,
         'opcion': _selectedOption,
         'id': id,
+        'promedioCalificaciones': 0,
       });
 
       print("Datos del usuario guardados en Firestore");
@@ -211,7 +220,9 @@ class _RegistroScreenState extends State<RegistroScreen> {
             ),
             child: Column(
               children: <Widget>[
-                LogoWidget("assets/images/logo.png",),
+                LogoWidget(
+                  "assets/images/logo.png",
+                ),
                 const SizedBox(height: 0.5),
                 reusableTextFiell(
                   "Ingrese Nombre",
@@ -272,7 +283,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
                         icon: const Icon(Icons.arrow_drop_down),
                         iconSize: 24,
                         elevation: 16,
-                        style: const TextStyle(color: Colors.black, fontSize: 18),
+                        style:
+                            const TextStyle(color: Colors.black, fontSize: 18),
                         underline: Container(),
                         onChanged: (String? newValue) {
                           setState(() {
@@ -313,7 +325,8 @@ class _RegistroScreenState extends State<RegistroScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => LoginScreem()),
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreem()),
                         );
                       },
                       child: const Text(

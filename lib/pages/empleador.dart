@@ -20,6 +20,8 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
   String searchQuery = '';
   late String trabajadorId;
   double promedioCalificaciones = 0.0;
+  int _visibleTrabajadores = 5;
+  List<DocumentSnapshot>? _filteredTrabajadores;
 
   @override
   void initState() {
@@ -241,10 +243,8 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
             ],
           ),
         ],
-        ///////////////////////////////////////////////
       ),
-      ////////////////////////////////////////////body
-
+      ///////////////////////////////////////////////
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context)
@@ -323,66 +323,84 @@ class _EmpleadoresScreenState extends State<EmpleadoresScreen> {
                           if (snapshot.hasData &&
                               snapshot.data!.docs.isNotEmpty) {
                             final trabajadores = snapshot.data!.docs;
-
-                            // Filtrar trabajadores por nombre
-
-                            final filteredTrabajadores =
+                            _filteredTrabajadores =
                                 trabajadores.where((trabajador) {
                               final nombreCompleto =
                                   '${trabajador['nombre']} ${trabajador['apellido']}';
-
                               return nombreCompleto
                                   .toLowerCase()
                                   .contains(searchQuery.toLowerCase());
                             }).toList();
+                            _filteredTrabajadores!.sort((a, b) {
+                              var promedioA =
+                                  a['promedioCalificaciones'] ?? 0;
+                              var promedioB =
+                                  b['promedioCalificaciones'] ?? 0;
+                              return promedioB.compareTo(promedioA);
+                            });
 
-                            if (filteredTrabajadores.isNotEmpty) {
-                              return ListView.builder(
-                                physics: NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount: filteredTrabajadores.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  var trabajador = filteredTrabajadores[index];
-
-                                  return Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.9,
-                                    height: MediaQuery.of(context).size.height *
-                                        0.125,
-                                    margin: EdgeInsets.all(20),
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Icon(Icons.person, size: 50),
-                                        Column(
-                                          children: [
-                                            Text(
-                                              '${trabajador['nombre']} ${trabajador['apellido']} \nTeléfono: ${trabajador['telefono']} \nCédula: ${trabajador['cedula']} \nCalificacion: ${trabajador['promedioCalificaciones']}',
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                            const SizedBox(height: 5),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            } else {
+                            if (_filteredTrabajadores!.isEmpty) {
                               return Text('No se encontraron trabajadores.');
                             }
+
+                            int totalTrabajadores =
+                                _filteredTrabajadores!.length;
+
+                            return ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount:
+                                  _visibleTrabajadores < totalTrabajadores
+                                      ? _visibleTrabajadores
+                                      : totalTrabajadores,
+                              itemBuilder: (BuildContext context, int index) {
+                                var trabajador = _filteredTrabajadores![index];
+                                return Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  height: MediaQuery.of(context).size.height *
+                                      0.125,
+                                  margin: EdgeInsets.all(20),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Icon(Icons.person, size: 50),
+                                      Column(
+                                        children: [
+                                          Text(
+                                            '${trabajador['nombre']} ${trabajador['apellido']} \nTeléfono: ${trabajador['telefono']} \nCédula: ${trabajador['cedula']} \nCalificacion: ${trabajador['promedioCalificaciones']}',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                          const SizedBox(height: 5),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
                           }
 
                           return Text('No se encontraron trabajadores.');
                         },
                       ),
+                if (_filteredTrabajadores != null &&
+                    _filteredTrabajadores!.length > _visibleTrabajadores)
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _visibleTrabajadores += 5; // Mostrar 5 trabajadores más
+                      });
+                    },
+                    child: Text('Mostrar más'),
+                  ),
               ],
             ),
           ),

@@ -67,14 +67,24 @@ class _MostrarContratoState extends State<MostrarContrato> {
       if (cantidadCalificaciones > 0) {
         promedio = promedio / cantidadCalificaciones;
       }
+      print(trabajadorId);
+      // Cambiar la primera letra del ID a 'T'
+      String nuevoId = 'T' + trabajadorId.substring(1);
+      print(nuevoId);
+      // Verificar si el ID del trabajador empieza con 'T' antes de actualizar el promedio en Firestore
+      if (nuevoId.startsWith('T')) {
+        // Actualiza el valor del promedio en Firestore en la colección 'usuarios'
+        DocumentReference userDocRef =
+            FirebaseFirestore.instance.collection('usuarios').doc(nuevoId);
 
-      // Actualiza el valor del promedio en Firestore en la colección 'usuarios'
-      DocumentReference userDocRef =
-          FirebaseFirestore.instance.collection('usuarios').doc(trabajadorId);
-
-      await userDocRef.update({'promedioCalificaciones': promedio});
-      promedioCalificaciones = promedio;
-      print('El promedio de calificaciones se ha actualizado en Firestore.');
+        await userDocRef.update({'promedioCalificaciones': promedio});
+        promedioCalificaciones = promedio;
+        print(
+            'El promedio de calificaciones se ha actualizado en Firestore para el trabajador con ID que empieza por "T".');
+      } else {
+        print(
+            'El trabajador con ID $trabajadorId no cumple con el requisito de que empiece con "T". No se actualizó el promedio en Firestore.');
+      }
     } catch (error) {
       print('Error al obtener los contratos: $error');
     }
