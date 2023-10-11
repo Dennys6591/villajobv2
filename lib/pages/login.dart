@@ -226,64 +226,6 @@ class _LoginScreemState extends State<LoginScreem> {
       ),
     );
 
-    // return Scaffold(
-    //   body: Container(
-    //     width: MediaQuery.of(context).size.width,
-    //     height: MediaQuery.of(context).size.height,
-    //     decoration: const BoxDecoration(
-    //       gradient: LinearGradient(
-    //         colors: [
-    //           Color.fromARGB(255, 47, 152, 233),
-    //           Color.fromRGBO(236, 163, 249, 1),
-    //         ],
-    //         begin: Alignment.topCenter,
-    //         end: Alignment.bottomCenter,
-    //       ),
-    //     ),
-    //     child: SingleChildScrollView(
-    //       child: Padding(
-    //         padding: EdgeInsets.fromLTRB(
-    //           20,
-    //           MediaQuery.of(context).size.height * 0.2,
-    //           20,
-    //           0,
-    //         ),
-    //         child: Column(
-    //           children: [
-    //             LogoWidget("assets/images/logo.png"),
-    //             const SizedBox(
-    //               height: 30,
-    //             ),
-    //             reusableTextFiell(
-    //               "Correo",
-    //               Icons.person_outline,
-    //               false,
-    //               _emailTextController,
-    //             ),
-    //             const SizedBox(
-    //               height: 30,
-    //             ),
-    //             reusableTextFiell(
-    //               "Contraseña",
-    //               Icons.lock_outline,
-    //               true,
-    //               _passwordTextController,
-    //             ),
-    //             const SizedBox(
-    //               height: 30,
-    //             ),
-    //             loginButton(context, _isLoading, _signInWithEmailAndPassword),
-    //             Recuperar_contrasena(),
-    //             const SizedBox(
-    //               height: 10,
-    //             ),
-    //             Opcion_de_registro(),
-    //           ],
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 
   Future<void> _signInWithEmailAndPassword() async {
